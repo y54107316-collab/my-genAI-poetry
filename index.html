@@ -400,10 +400,10 @@
 
     <script>
     // ==================== 配置区域 ====================
-    // 方案一：使用 CORS 代理（用于 GitHub Pages）
-    const CORS_PROXY = 'https://cors-anywhere.herokuapp.com/';
-    const N8N_WEBHOOK_URL = CORS_PROXY + 'http://localhost:5678/webhook/my%20webhook';
-    
+    // 使用不需要授权的 CORS 代理
+    const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
+    // 或者使用这个：const CORS_PROXY = 'https://corsproxy.io/?';
+    // 或者使用这个：const CORS_PROXY = 'https://proxy.cors.sh/';
     // 方案二：直接本地访问（用于本地测试）
     // const N8N_WEBHOOK_URL = 'http://localhost:5678/webhook/my%20webhook';
     
