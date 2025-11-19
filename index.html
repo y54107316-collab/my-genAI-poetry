@@ -589,58 +589,97 @@
             });
     }
 
-    // 发送到 n8n 的函数 - 确保真正发送数据
-    async function sendToN8n(data, imageFiles) {
-        try {
-            console.log('正在发送数据到 n8n:', N8N_WEBHOOK_URL);
-            console.log('发送的数据:', data);
-            
-            // 创建 FormData 对象，用于发送表单数据和文件
-            const formData = new FormData();
-            
-            // 添加文本数据
-            for (const key in data) {
-                formData.append(key, data[key]);
+    // 发送到 n8n 的函数 - 使用 GET 方法
+async function sendToN8n(data) {
+    try {
+        console.log('正在发送数据到 n8n (GET):', N8N_WEBHOOK_URL);
+        console.log('发送的数据:', data);
+        
+        // 将数据转换为查询参数
+        const queryParams = new URLSearchParams(data).toString();
+        const urlWithParams = `${N8N_WEBHOOK_URL}?${queryParams}`;
+        
+        console.log('完整URL:', urlWithParams);
+        
+        // 使用 GET 请求
+        const response = await fetch(urlWithParams, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
             }
-            
-            // 添加图片文件
-            imageFiles.forEach((file, index) => {
-                formData.append(`image${index + 1}`, file);
-            });
-            
-            // 真正发送 POST 请求到 n8n webhook
-            const response = await fetch(N8N_WEBHOOK_URL, {
-                method: 'POST',
-                body: formData
-            });
+        });
 
-            console.log('n8n 响应状态:', response.status);
-            
-            if (response.ok) {
-                const responseData = await response.json();
-                console.log('n8n 完整响应:', responseData);
-                return { 
-                    success: true, 
-                    message: '数据成功发送到 n8n',
-                    data: responseData
-                };
-            } else {
-                const errorText = await response.text();
-                console.error('n8n 返回错误:', response.status, errorText);
-                return { 
-                    success: false, 
-                    error: `HTTP ${response.status}: ${errorText}` 
-                };
-            }
-
-        } catch (error) {
-            console.error('请求 n8n 失败:', error);
+        console.log('n8n 响应状态:', response.status);
+        
+        if (response.ok) {
+            const responseData = await response.json();
+            console.log('n8n 完整响应:', responseData);
+            return { 
+                success: true, 
+                message: '数据成功发送到 n8n',
+                data: responseData
+            };
+        } else {
+            const errorText = await response.text();
+            console.error('n8n 返回错误:', response.status, errorText);
             return { 
                 success: false, 
-                error: '网络请求失败: ' + error.message 
+                error: `HTTP ${response.status}: ${errorText}` 
             };
         }
+
+    } catch (error) {
+        console.error('请求 n8n 失败:', error);
+        return { 
+            success: false, 
+            error: '网络请求失败: ' + error.message 
+        };
     }
-    </script>
+    // 测试连接函数 - 也使用 GET
+async function testConnection() {
+    console.log('测试连接...');
+    
+    const testConnectionBtn = document.getElementById('testConnectionBtn');
+    if (testConnectionBtn) {
+        testConnectionBtn.disabled = true;
+        testConnectionBtn.textContent = '测试中...';
+    }
+
+    try {
+        const testData = {
+            test: true,
+            timestamp: new Date().toISOString(),
+            action: 'test_connection'
+        };
+        
+        const queryParams = new URLSearchParams(testData).toString();
+        const testUrl = `${N8N_WEBHOOK_URL}?${queryParams}`;
+        
+        console.log('测试URL:', testUrl);
+        
+        const response = await fetch(testUrl, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+            }
+        });
+
+        if (response.ok) {
+            showMessage('✅ 连接测试成功！n8n Webhook 可正常访问。', 'success');
+        } else {
+            showMessage('⚠️ 连接测试失败: HTTP ' + response.status, 'error');
+        }
+    } catch (error) {
+        console.error('连接测试错误:', error);
+        showMessage('❌ 连接测试失败: ' + error.message, 'error');
+    } finally {
+        if (testConnectionBtn) {
+            testConnectionBtn.disabled = false;
+            testConnectionBtn.textContent = '测试连接';
+        }
+    }
+}
+
+</script>
 </body>
 </html>
