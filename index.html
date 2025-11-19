@@ -398,9 +398,14 @@
     </div>
 
 
-<script>
-    //
-    const N8N_WEBHOOK_URL = 'http://localhost:5678/webhook/my webhook'; 
+    <script>
+    // ==================== 配置区域 ====================
+    // 方案一：使用 CORS 代理（用于 GitHub Pages）
+    const CORS_PROXY = 'https://cors-anywhere.herokuapp.com/';
+    const N8N_WEBHOOK_URL = CORS_PROXY + 'http://localhost:5678/webhook/my%20webhook';
+    
+    // 方案二：直接本地访问（用于本地测试）
+    // const N8N_WEBHOOK_URL = 'http://localhost:5678/webhook/my%20webhook';
     
     // 水墨背景图片数组
     const inkImages = [
@@ -409,6 +414,7 @@
         'https://images.unsplash.com/photo-1707343843598-3107774b6e4a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
         'https://images.unsplash.com/photo-1707343844158-97c8c16a4851?ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80'
     ];
+    // ==================== 配置区域结束 ====================
 
     // 等待页面完全加载
     document.addEventListener('DOMContentLoaded', function() {
@@ -544,7 +550,7 @@
         return '';
     }
 
-    // 发送到 n8n 的函数
+    // 发送到 n8n 的函数 - 修复 CORS 问题
     async function sendToN8n(data) {
         try {
             console.log('正在发送数据到:', N8N_WEBHOOK_URL);
@@ -554,6 +560,7 @@
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                mode: 'cors', // 明确指定 CORS 模式
                 body: JSON.stringify(data)
             });
 
@@ -649,7 +656,7 @@
         // 安全设置诗歌信息
         try {
             const infoText = `题材：${theme || ''} | 体裁：${genre || ''} | 书法：${calligraphy || ''} | 感情：${emotion || ''}`;
-            poetryInfo.textContent = infoText; // 使用 textContent 避免 HTML 问题
+            poetryInfo.textContent = infoText;
         } catch (error) {
             console.error('设置诗歌信息失败:', error);
             poetryInfo.textContent = '诗歌信息';
@@ -663,7 +670,6 @@
             outputSection.scrollIntoView({ behavior: 'smooth' });
         } catch (error) {
             console.error('滚动失败:', error);
-            // 忽略滚动错误，不影响主要功能
         }
         
         console.log('诗歌结果显示完成');
@@ -672,7 +678,6 @@
     function generateMockPoetry(emotion, imagery, theme, genre) {
         console.log('生成模拟诗歌:', { emotion, imagery, theme, genre });
         
-        // 确保所有参数都是字符串
         const safeTheme = theme || '山水诗';
         const safeGenre = genre || '七言绝句';
         
@@ -697,7 +702,6 @@
             }
         };
 
-        // 安全获取诗歌内容
         const themePoems = poems[safeTheme] || poems['山水诗'];
         const poem = themePoems[safeGenre] || themePoems['七言绝句'] || "诗歌生成中...";
         
@@ -708,6 +712,7 @@
     function downloadPoetryImage() {
         alert('下载功能将在 n8n 工作流完成后实现');
     }
+</script>
 </script>
 </body>
 </html>
