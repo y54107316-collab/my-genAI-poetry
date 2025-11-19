@@ -284,6 +284,22 @@
         .clear-btn:hover {
             background-color: #5a6268;
         }
+        
+        .delete-img {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            display: none;
+            z-index: 10;
+        }
     </style>
 </head>
 <body>
@@ -303,30 +319,35 @@
                         <i>+</i>
                         <span>上传图片</span>
                         <img id="preview1" src="" alt="预览图片">
+                        <button class="delete-img" id="delete1">×</button>
                         <input type="file" class="file-input" id="fileInput1" accept="image/*">
                     </div>
                     <div class="upload-box" id="uploadBox2">
                         <i>+</i>
                         <span>上传图片</span>
                         <img id="preview2" src="" alt="预览图片">
+                        <button class="delete-img" id="delete2">×</button>
                         <input type="file" class="file-input" id="fileInput2" accept="image/*">
                     </div>
                     <div class="upload-box" id="uploadBox3">
                         <i>+</i>
                         <span>上传图片</span>
                         <img id="preview3" src="" alt="预览图片">
+                        <button class="delete-img" id="delete3">×</button>
                         <input type="file" class="file-input" id="fileInput3" accept="image/*">
                     </div>
                     <div class="upload-box" id="uploadBox4">
                         <i>+</i>
                         <span>上传图片</span>
                         <img id="preview4" src="" alt="预览图片">
+                        <button class="delete-img" id="delete4">×</button>
                         <input type="file" class="file-input" id="fileInput4" accept="image/*">
                     </div>
                     <div class="upload-box" id="uploadBox5">
                         <i>+</i>
                         <span>上传图片</span>
                         <img id="preview5" src="" alt="预览图片">
+                        <button class="delete-img" id="delete5">×</button>
                         <input type="file" class="file-input" id="fileInput5" accept="image/*">
                     </div>
                 </div>
@@ -442,574 +463,328 @@
             // 安全地绑定事件
             const generateBtn = document.getElementById('generateBtn');
             if (generateBtn) {
-                generateBtn.addEventListener.addEventListener('click', function() {
-('click', function() {
-                    generatePoetry                    generatePoetry();
+                generateBtn.addEventListener('click', function() {
+                    generatePoetry();
                 });
             }
 
-            // 添加();
-                });
-            }
-
-            // 添加测试连接按钮的事件测试连接按钮的事件监听
-            const testConnection监听
-            const testConnectionBtn =Btn = document.getElementById('test document.getElementById('testConnectionBtnConnectionBtn');
-            if (');
-            if (testConnectionBtn)testConnectionBtn) {
-                {
-                test testConnectionBtn.addEventListener('ConnectionBtn.addEventListener('click', function() {
-                    testclick', function() {
+            // 添加测试连接按钮的事件监听
+            const testConnectionBtn = document.getElementById('testConnectionBtn');
+            if (testConnectionBtn) {
+                testConnectionBtn.addEventListener('click', function() {
                     testConnection();
                 });
-Connection();
-                });
             }
             
-            //             }
-            
-            // 添加清空表单添加清空表单按钮的事件监听
-            const clearBtn按钮的事件监听
-            const clearBtn = document = document.getElementById('clearBtn');
-.getElementById('clearBtn');
-                       if (clearBtn) if (clearBtn) {
-                {
-                clearBtn.addEventListener clearBtn.addEventListener('click',('click', function() {
-                    clear function() {
+            // 添加清空表单按钮的事件监听
+            const clearBtn = document.getElementById('clearBtn');
+            if (clearBtn) {
+                clearBtn.addEventListener('click', function() {
                     clearForm();
-Form();
-                });
-            }
                 });
             }
             
-                       
-            console.log('初始化完成 console.log('初始化完成');
-        });
-
-        // 初始化');
+            console.log('初始化完成');
         });
 
         // 初始化图片上传功能
-        function图片上传功能
         function initImageUpload() {
-            initImageUpload() {
-            for (let i = 1; for (let i = 1; i <= 5; i i <= 5; i++) {
-                const uploadBox++) {
-                const uploadBox = document = document.getElementById(`uploadBox${.getElementById(`uploadBox${ii}`);
-                const fileInput =}`);
-                const fileInput = document.getElementById(`fileInput${ document.getElementById(`fileInput${i}`);
+            for (let i = 1; i <= 5; i++) {
+                const uploadBox = document.getElementById(`uploadBox${i}`);
+                const fileInput = document.getElementById(`fileInput${i}`);
+                const deleteBtn = document.getElementById(`delete${i}`);
                 
-                if (i}`);
-                
-                if (uploadBoxuploadBox && fileInput) {
- && fileInput) {
-                                       uploadBox.addEventListener('click', uploadBox.addEventListener('click', function() {
-                        fileInput function() {
-                        fileInput.click.click();
+                if (uploadBox && fileInput) {
+                    // 点击上传框触发文件选择
+                    uploadBox.addEventListener('click', function(e) {
+                        // 防止点击删除按钮时触发上传
+                        if (e.target !== deleteBtn) {
+                            fileInput.click();
+                        }
                     });
                     
-();
+                    // 文件选择变化时预览图片
+                    fileInput.addEventListener('change', function() {
+                        previewImage(this, i);
                     });
                     
-                    fileInput                    fileInput.addEventListener('change',.addEventListener('change', function() function() {
-                        previewImage(this, i);
-                    });
+                    // 删除按钮点击事件
+                    if (deleteBtn) {
+                        deleteBtn.addEventListener('click', function(e) {
+                            e.stopPropagation(); // 阻止事件冒泡
+                            clearImage(i);
+                        });
+                    }
                 }
- {
-                        previewImage(this, i);
-                    });
-                }
-            }
             }
         }
 
-        function previewImage(input, box        }
-
-        function previewImage(input, boxNumberNumber) {
-            if (input) {
-            if (input.files && input.files.files && input.files[0]) {
-                const[0]) {
-                const reader = reader = new FileReader();
- new FileReader();
+        // 预览图片
+        function previewImage(input, boxNumber) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
                 
-                               
-                reader.onload = function reader.onload = function(e(e) {
-                    const) {
-                    const preview = document preview = document.getElementById(`preview${.getElementById(`preview${boxNumberboxNumber}`);
-                    const upload}`);
-                    const uploadBox =Box = document.getElementById(`uploadBox document.getElementById(`uploadBox${${boxNumber}`);
-                    
-boxNumber}`);
-                    
-                    if                    if (preview && uploadBox (preview && uploadBox) {
-                        preview.src = e.target) {
-                        preview.src = e.result;
-                        preview.style.display.target.result;
-                        preview.style.display = = 'block';
-                        
-                        const icon 'block';
-                        
-                        const icon = uploadBox.querySelector(' = uploadBox.querySelector('i');
-                        const text =i');
-                        const text = uploadBox.querySelector('span uploadBox.querySelector('span');
-                        
-');
-                        
-                        if (icon                        if (icon) icon.style.display) icon.style.display = 'none';
-                        = 'none';
-                        if (text) text.style if (text) text.style.display = 'none';
-                    }
+                // 验证文件类型
+                if (!file.type.match('image.*')) {
+                    showMessage('请选择有效的图片文件', 'error');
+                    return;
                 }
                 
-                reader.read.display = 'none';
-                    }
+                // 验证文件大小（限制为5MB）
+                if (file.size > 5 * 1024 * 1024) {
+                    showMessage('图片大小不能超过5MB', 'error');
+                    input.value = '';
+                    return;
                 }
                 
-               AsDataURL(input.files[0]);
-            }
-        reader.readAsDataURL(input.files[0]);
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const preview = document.getElementById(`preview${boxNumber}`);
+                    const uploadBox = document.getElementById(`uploadBox${boxNumber}`);
+                    const deleteBtn = document.getElementById(`delete${boxNumber}`);
+                    
+                    if (preview && uploadBox && deleteBtn) {
+                        preview.src = e.target.result;
+                        preview.style.display = 'block';
+                        
+                        const icon = uploadBox.querySelector('i');
+                        const text = uploadBox.querySelector('span');
+                        
+                        if (icon) icon.style.display = 'none';
+                        if (text) text.style.display = 'none';
+                        
+                        deleteBtn.style.display = 'block';
+                    }
+                };
+                
+                reader.readAsDataURL(file);
             }
         }
 
-        // 生成诗歌 }
+        // 清除图片
+        function clearImage(boxNumber) {
+            const preview = document.getElementById(`preview${boxNumber}`);
+            const uploadBox = document.getElementById(`uploadBox${boxNumber}`);
+            const fileInput = document.getElementById(`fileInput${boxNumber}`);
+            const deleteBtn = document.getElementById(`delete${boxNumber}`);
+            
+            if (preview && uploadBox && fileInput && deleteBtn) {
+                preview.src = '';
+                preview.style.display = 'none';
+                fileInput.value = '';
+                deleteBtn.style.display = 'none';
+                
+                const icon = uploadBox.querySelector('i');
+                const text = uploadBox.querySelector('span');
+                
+                if (icon) icon.style.display = 'block';
+                if (text) text.style.display = 'block';
+            }
+        }
 
         // 生成诗歌函数
-函数
-        function generatePo        function generatePoetry()etry() {
-            console.log {
-            console.log('开始('开始生成诗歌...');
-生成诗歌...');
+        function generatePoetry() {
+            console.log('开始生成诗歌...');
             
-            // 验证            
             // 验证表单
-            const validationError = validate表单
             const validationError = validateForm();
-           Form();
-            if (validationError if (validationError) {
-                showMessage() {
-                showMessage(validationErrorvalidationError, 'error');
-                return;
-            }
-            
-, 'error');
+            if (validationError) {
+                showMessage(validationError, 'error');
                 return;
             }
             
             // 收集表单数据
-                       // 收集表单数据
             const formData = {
-                const formData = {
-                emotion: document.getElementById emotion: document.getElementById('emotion').value,
-                imagery('emotion').value,
-                imagery: document.getElementById('imagery: document.getElementById('imagery').value,
-                additional:').value,
+                emotion: document.getElementById('emotion').value,
+                imagery: document.getElementById('imagery').value,
                 additional: document.getElementById('additional').value,
                 theme: document.getElementById('theme').value,
-                genre: document.getElementById document.getElementById('additional').value,
-                theme: document.getElementById('theme').value,
-                genre('genre').value,
-               : document.getElementById('genre').value calligraphy: document.getElementById('call,
-                calligraphy: documentigraphy').value,
-                timestamp.getElementById('calligraphy').value,
-: new Date().toISOString                timestamp: new Date().to(),
-                action: 'generateISOString(),
+                genre: document.getElementById('genre').value,
+                calligraphy: document.getElementById('calligraphy').value,
+                timestamp: new Date().toISOString(),
                 action: 'generate_poetry'
             };
             
-            console.log_poetry'
-            };
+            console.log('表单数据:', formData);
             
-            console.log('表单数据:',('表单数据:', formData);
- formData);
-            
-            //            
-            // 显示加载动画 显示加载动画
-           
+            // 显示加载动画
             showLoading(true);
- showLoading(true);
             
-                       
-            // 发送数据 // 发送数据到 n8到 n8n
-           n
-            sendTo sendToN8n(formDataN8n(formData)
-                .)
-                .then(result =>then(result => {
-                    // {
-                    // 隐藏加载动画 隐藏加载动画
-                    show
+            // 发送数据到 n8n
+            sendToN8n(formData)
+                .then(result => {
+                    // 隐藏加载动画
                     showLoading(false);
-Loading(false);
                     
-                    if                    
-                    if (result (result.success) {
-                        show.success) {
-                        showMessage('Message('数据成功发送到数据成功发送到 n8n n8n！', '！', 'success');
-                        console.log('success');
-                        console.log('n8n 响应:',n8n 响应:', result result.data);
-.data);
-                    } else                    } else {
-                        showMessage(`发送失败: {
-                        showMessage(`发送失败: ${result.error} ${result.error}`, 'error');
+                    if (result.success) {
+                        showMessage('数据成功发送到 n8n！', 'success');
+                        console.log('n8n 响应:', result.data);
+                    } else {
+                        showMessage(`发送失败: ${result.error}`, 'error');
                     }
                     
-                   `, 'error');
-                    }
-                    
-                    //  // 显示调试信息
-显示调试信息
-                    const                    const debugInfo = document.getElementById(' debugInfo = document.getElementById('debugdebugInfo');
-                    if (Info');
-                    if (debugInfodebugInfo) {
-                        debug) {
-                        debugInfo.textInfo.textContent = JSON.stringifyContent = JSON.stringify(result,(result, null, 2);
- null, 2);
-                        debug                        debugInfo.style.display = 'Info.style.display = 'block';
-block';
+                    // 显示调试信息
+                    const debugInfo = document.getElementById('debugInfo');
+                    if (debugInfo) {
+                        debugInfo.textContent = JSON.stringify(result, null, 2);
+                        debugInfo.style.display = 'block';
                     }
                 })
-                    }
-                })
-                .                .catch(error => {
-catch(error => {
-                    //                    // 隐藏加载动画
- 隐藏加载动画
-                    showLoading                    showLoading(false);
+                .catch(error => {
+                    // 隐藏加载动画
+                    showLoading(false);
                     
-                   (false);
-                    
-                    showMessage showMessage(`发生错误:(`发生错误: ${error ${error.message}`, '.message}`, 'error');
-                   error');
+                    showMessage(`发生错误: ${error.message}`, 'error');
                     console.error('生成诗歌时出错:', error);
                 });
         }
 
-        //  console.error('生成诗歌时出错:', error);
-                });
-        }
-
         // 测试连接函数
-        async function testConnection()测试连接函数
-        async function test {
-            console.log('测试连接Connection() {
+        async function testConnection() {
             console.log('测试连接...');
             
-            const...');
-            
-            const testConnectionBtn = document.getElementById('test testConnectionBtn = document.getElementById('testConnectionBtn');
-           ConnectionBtn');
-            if ( if (testConnectionBtn)testConnectionBtn) {
-                testConnectionBtn.disabled = true {
-                testConnectionBtn;
-                testConnectionBtn.textContent = '测试中...';
-.disabled = true;
+            const testConnectionBtn = document.getElementById('testConnectionBtn');
+            if (testConnectionBtn) {
+                testConnectionBtn.disabled = true;
                 testConnectionBtn.textContent = '测试中...';
             }
 
-            try            }
-
             try {
-                {
-                const testData = const testData = {
-                    {
+                const testData = {
                     test: true,
-                    test: true,
-                    timestamp: new timestamp: new Date().to Date().toISOString(),
-ISOString(),
-                    action: '                    action: 'test_test_connection'
-                };
-connection'
+                    timestamp: new Date().toISOString(),
+                    action: 'test_connection'
                 };
                 
-                const                
-                const result = await send result = await sendToN8ToN8n(testData);
-n(testData);
+                const result = await sendToN8n(testData);
                 
-                               
-                if (result.success if (result.success) {
-) {
-                    showMessage('                    showMessage('✅ 连接✅ 连接测试成功！测试成功！n8n8n Webhook 可n Webhook 可正常访问。正常访问。', '', 'success');
-                }success');
+                if (result.success) {
+                    showMessage('✅ 连接测试成功！n8n Webhook 可正常访问。', 'success');
                 } else {
-                    show else {
-                    showMessage('Message('⚠️ 连接⚠️ 连接测试失败:测试失败: ' + result.error ' + result.error, 'error, 'error');
+                    showMessage('⚠️ 连接测试失败: ' + result.error, 'error');
                 }
-');
-                }
-            } catch            } catch (error) {
- (error) {
-                console                console.error.error('连接测试错误:', error);
-('连接测试错误:', error);
-                show                showMessage('Message('❌❌ 连接测试失败: ' + error.message, ' 连接测试失败: ' + error.message, 'errorerror');
+            } catch (error) {
+                console.error('连接测试错误:', error);
+                showMessage('❌ 连接测试失败: ' + error.message, 'error');
             } finally {
-                if (test');
-            } finally {
-                if (testConnectionBtnConnectionBtn) {
+                if (testConnectionBtn) {
                     testConnectionBtn.disabled = false;
-) {
-                    testConnectionBtn.disabled = false;
-                                       testConnectionBtn.textContent = '测试连接 testConnectionBtn.textContent = '测试连接';
+                    testConnectionBtn.textContent = '测试连接';
                 }
             }
         }
 
-       ';
-                }
-            }
-        }
-
-        // 发送到 n // 发送到 n88n 的函数 - 使用n 的函数 - 使用 GET 方法
-        async GET 方法
-        async function sendToN8n(data function sendToN8n(data) {
+        // 发送到 n8n 的函数 - 使用 GET 方法
+        async function sendToN8n(data) {
             try {
-                console) {
-            try {
-                console.log('正在发送数据到 n8n (GET.log('正在发送数据到 n8n (GET):', N8N):', N8N_WEBHOOK_URL);
-                console_WEBHOOK_URL);
-.log('发送的数据:', data);
+                console.log('正在发送数据到 n8n (GET):', N8N_WEBHOOK_URL);
+                console.log('发送的数据:', data);
                 
-                console.log('发送的数据:', data                // 将数据转换为);
-                
-                // 将查询参数
-                const query数据转换为查询参数
+                // 将数据转换为查询参数
                 const queryParams = new URLSearchParams(data).toString();
-                constParams = new URLSearchParams(data).toString();
-                const urlWithParams = `${N urlWithParams = `${N8N8N_WEBHO_WEBHOOK_URL}OK_URL}?${queryParams?${queryParams}`;
+                const urlWithParams = `${N8N_WEBHOOK_URL}?${queryParams}`;
                 
-}`;
+                console.log('完整URL:', urlWithParams);
                 
-                console.log('                console.log('完整URL:',完整URL:', urlWithParams);
- urlWithParams);
-                
-                               
-                // 使用 GET // 使用 GET 请求
- 请求
-                const response                const response = await fetch(url = await fetch(urlWithParamsWithParams, {
-                    method, {
-                    method: 'GET: 'GET',
-                    headers: {
-                        'Accept': '',
+                // 使用 GET 请求
+                const response = await fetch(urlWithParams, {
+                    method: 'GET',
                     headers: {
                         'Accept': 'application/json',
-application/json',
                     }
                 });
 
-                    }
-                });
-
-                console                console.log('n8.log('n8n 响应n 响应状态:', response.status);
-                
-                if (状态:', response.status);
+                console.log('n8n 响应状态:', response.status);
                 
                 if (response.ok) {
-response.ok) {
-                    const response                    const responseData = awaitData = await response.json();
-                    response.json();
-                    console.log console.log('n8n 完整响应:', responseData('n8n 完整响应);
+                    let responseData;
+                    try {
+                        responseData = await response.json();
+                    } catch (e) {
+                        // 如果响应不是JSON，使用文本
+                        responseData = await response.text();
+                    }
+                    console.log('n8n 完整响应:', responseData);
                     return { 
-                       :', responseData);
-                    return { 
-                        success: true, success: true, 
-                        message: '数据成功发送到 n 
-                        message: '数据成功8n',
-                        data:发送到 n8n',
-                        responseData
-                    };
-                data: responseData
+                        success: true, 
+                        message: '数据成功发送到 n8n',
+                        data: responseData
                     };
                 } else {
-                    } else {
-                    const error const errorText = await response.textText = await response.text();
-                    console();
-                    console.error('n8.error('n8n n 返回错误:', response返回错误:', response.status, errorText);
+                    const errorText = await response.text();
+                    console.error('n8n 返回错误:', response.status, errorText);
                     return { 
-.status, errorText);
-                    return {                        success: false, 
-                        error 
                         success: false, 
-                        error: `HTTP ${response.status}: ${errorText: `HTTP ${response.status}: ${errorText}`}` 
-                    };
-                }
-
-            } catch (error) 
+                        error: `HTTP ${response.status}: ${errorText}` 
                     };
                 }
 
             } catch (error) {
-                console.error('请求 n8n 失败:', {
-                console.error('请求 n8n 失败:', error error);
+                console.error('请求 n8n 失败:', error);
                 return { 
                     success: false, 
-);
-                return { 
-                    success: false, 
-                    error                    error: '网络请求失败: ' + error.message 
-: '网络请求失败: ' + error.message 
-                };
+                    error: '网络请求失败: ' + error.message 
                 };
             }
-        }
-
-        // 表单            }
         }
 
         // 表单验证函数
-       验证函数
-        function validate function validateForm() {
-            const emotionForm() {
-            const emotion = document = document.getElementById('emotion.getElementById('emotion').').value.trim();
-            constvalue.trim();
-            const imagery = imagery = document.getElementById('imagery'). document.getElementById('imagery').value.trim();
+        function validateForm() {
+            const emotion = document.getElementById('emotion').value.trim();
+            const imagery = document.getElementById('imagery').value.trim();
             
-            ifvalue.trim();
-            
-            if (!em (!emotion)otion) {
-                return '请填写诗歌感情 {
+            if (!emotion) {
                 return '请填写诗歌感情';
             }
             
-            if (!imag';
-            }
-            
             if (!imagery) {
-                return 'ery) {
                 return '请填写诗歌意象';
-           请填写诗歌意象';
             }
             
             return null;
         }
 
- }
-            
-            return        // 显示/隐藏 null;
-        }
-
         // 显示/隐藏加载动画
-        function show加载动画
-        function showLoading(show)Loading(show) {
-            const loadingElement = document.getElementById {
+        function showLoading(show) {
             const loadingElement = document.getElementById('loading');
-            if (loadingElement('loading');
             if (loadingElement) {
-                loadingElement.style.display) {
-                loadingElement.style.display = show ? = show ? 'block' : 'none';
+                loadingElement.style.display = show ? 'block' : 'none';
             }
-        'block' : 'none';
-            }
-
-        // 显示消息 }
         }
 
         // 显示消息
-        function showMessage(message
-        function showMessage(message, type = 'error'), type = 'error') {
-            const statusMessage = {
+        function showMessage(message, type) {
             const statusMessage = document.getElementById('statusMessage');
-            if document.getElementById('statusMessage');
-            (statusMessage) {
-                if (statusMessage) {
-                statusMessage.textContent = message statusMessage.textContent = message;
-                statusMessage.className;
-                statusMessage.className = `status-message ${ = `status-message ${type === 'success' ? 'statustype === 'success' ? 'status-success'-success' : 'status-error'}`;
-                statusMessage : 'status-error'}`;
+            if (statusMessage) {
+                statusMessage.textContent = message;
+                statusMessage.className = `status-message ${type === 'success' ? 'status-success' : 'status-error'}`;
                 statusMessage.style.display = 'block';
-.style.display = 'block';
                 
-                // 自动隐藏                
                 // 自动隐藏成功消息
-                if (type成功消息
                 if (type === 'success') {
-                    setTimeout === 'success') {
                     setTimeout(() => {
-                        statusMessage(() => {
                         statusMessage.style.display = 'none';
-.style.display = 'none';
                     }, 5000);
-                                   }, 5000);
                 }
             }
         }
 
-        }
-            }
-        }
-
-        // // 清空表单
-        function clear 清空表单
+        // 清空表单
         function clearForm() {
-            // 清Form() {
-            // 空文本区域
-            document.getElementById('emotion').value =清空文本区域
+            // 清空文本区域
             document.getElementById('emotion').value = '';
             document.getElementById('imagery').value = '';
-            document.getElementById('imagery').value = '';
-            '';
-            document.getElementById('additional').value document.getElementById('additional').value = = '';
+            document.getElementById('additional').value = '';
             
-            //  '';
-            
-            // 重置选择重置选择框
-            document框
-            document.getElementById('.getElementById('theme').selectedIndex =theme').selectedIndex =  0;
-            document.getElementById('0;
-            document.getElementById('genre').selectedIndex = genre').selectedIndex = 0;
-0;
-            document.getElementById('            document.getElementById('calligraphy').selectedIndex = 0calligraphy').selectedIndex = 0;
-            
-            // 清;
+            // 重置选择框
+            document.getElementById('theme').selectedIndex = 0;
+            document.getElementById('genre').selectedIndex = 0;
+            document.getElementById('calligraphy').selectedIndex = 0;
             
             // 清空图片预览
-            for空图片预览
-            for (let i = 1 (let i = 1; i <= 5; i++); i <= 5; i++) {
-                const preview = document.getElementById(`preview${i}`);
-                const uploadBox = document.getElementById(`upload {
-                const preview = document.getElementById(`preview${i}`);
-                const uploadBox = document.getElementById(`uploadBox${i}`);
-                const fileInput = document.getElementById(`fileInput${iBox${i}`);
-                const fileInput = document.getElementById(`fileInput${i}`);
-                
-                if (preview) {
-                    preview.src = '';
-                    preview.style.display = 'none';
-}`);
-                
-                if (preview) {
-                    preview.src = '';
-                    preview.style.display = '                }
-                
-                if (uploadBox) {
-                    const icon = uploadBox.querySelector('i');
-                    const text = uploadBox.querySelector('span');
-                    
-                    if (icon) icon.stylenone';
-                }
-                
-                if (uploadBox) {
-                    const icon = uploadBox.querySelector('i');
-                    const text = uploadBox.querySelector('span');
-                    
-                    if (icon).display = 'block';
-                    if (text) text.style.display = 'block';
-                }
-                
-                if (fileInput) {
-                    fileInput.value = icon.style.display = 'block';
-                    if (text) text.style.display = 'block';
-                }
-                
-                if (fileInput) {
-                    fileInput.value = '';
-                }
-            }
-            
-            // 隐藏状态消息和调试信息
-            const statusMessage = document.getElementById('statusMessage');
-            const debugInfo = document.getElementById('debugInfo');
-            
-            if (statusMessage) statusMessage.style.display = '';
-                }
+            for (let i = 1; i <= 5; i++) {
+                clearImage(i);
             }
             
             // 隐藏状态消息和调试信息
@@ -1017,9 +792,6 @@ response.ok) {
             const debugInfo = document.getElementById('debugInfo');
             
             if (statusMessage) statusMessage.style.display = 'none';
-            if (debugInfo) debugInfo.style.display = 'none';
-            
-            showMessage('表单已 'none';
             if (debugInfo) debugInfo.style.display = 'none';
             
             showMessage('表单已清空', 'success');
