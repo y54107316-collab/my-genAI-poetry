@@ -434,23 +434,19 @@
     </div>
 
     <script>
-        // ==================== 配置区域 ====================
-        // n8n webhook URL - 注意空格被编码为%20
+        // 配置区域
         const N8N_WEBHOOK_URL = 'http://localhost:5678/webhook/my%20webhook';
-        
-        // 水墨背景图片数组
         const inkImages = [
             'https://images.unsplash.com/photo-1579546929662-711aa81148cf?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80',
             'https://images.unsplash.com/photo-1541701494587-cb58502866ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80',
             'https://images.unsplash.com/photo-1550684376-efcbd6e3f031?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80'
         ];
-        // ==================== 配置区域结束 ====================
 
         // 等待页面完全加载
         document.addEventListener('DOMContentLoaded', function() {
             console.log('页面加载完成，初始化组件...');
             
-            // 安全地设置背景
+            // 设置背景
             const inkBackground = document.getElementById('inkBackground');
             if (inkBackground) {
                 const randomIndex = Math.floor(Math.random() * inkImages.length);
@@ -460,29 +456,10 @@
             // 初始化图片上传功能
             initImageUpload();
             
-            // 安全地绑定事件
-            const generateBtn = document.getElementById('generateBtn');
-            if (generateBtn) {
-                generateBtn.addEventListener('click', function() {
-                    generatePoetry();
-                });
-            }
-
-            // 添加测试连接按钮的事件监听
-            const testConnectionBtn = document.getElementById('testConnectionBtn');
-            if (testConnectionBtn) {
-                testConnectionBtn.addEventListener('click', function() {
-                    testConnection();
-                });
-            }
-            
-            // 添加清空表单按钮的事件监听
-            const clearBtn = document.getElementById('clearBtn');
-            if (clearBtn) {
-                clearBtn.addEventListener('click', function() {
-                    clearForm();
-                });
-            }
+            // 绑定事件
+            document.getElementById('generateBtn').addEventListener('click', generatePoetry);
+            document.getElementById('testConnectionBtn').addEventListener('click', testConnection);
+            document.getElementById('clearBtn').addEventListener('click', clearForm);
             
             console.log('初始化完成');
         });
@@ -613,7 +590,7 @@
             
             // 发送数据到 n8n
             sendToN8n(formData)
-                .then(result => {
+                .then(function(result) {
                     // 隐藏加载动画
                     showLoading(false);
                     
@@ -621,7 +598,7 @@
                         showMessage('数据成功发送到 n8n！', 'success');
                         console.log('n8n 响应:', result.data);
                     } else {
-                        showMessage(`发送失败: ${result.error}`, 'error');
+                        showMessage('发送失败: ' + result.error, 'error');
                     }
                     
                     // 显示调试信息
@@ -631,17 +608,17 @@
                         debugInfo.style.display = 'block';
                     }
                 })
-                .catch(error => {
+                .catch(function(error) {
                     // 隐藏加载动画
                     showLoading(false);
                     
-                    showMessage(`发生错误: ${error.message}`, 'error');
+                    showMessage('发生错误: ' + error.message, 'error');
                     console.error('生成诗歌时出错:', error);
                 });
         }
 
         // 测试连接函数
-        async function testConnection() {
+        function testConnection() {
             console.log('测试连接...');
             
             const testConnectionBtn = document.getElementById('testConnectionBtn');
@@ -650,83 +627,95 @@
                 testConnectionBtn.textContent = '测试中...';
             }
 
-            try {
-                const testData = {
-                    test: true,
-                    timestamp: new Date().toISOString(),
-                    action: 'test_connection'
-                };
-                
-                const result = await sendToN8n(testData);
-                
-                if (result.success) {
-                    showMessage('✅ 连接测试成功！n8n Webhook 可正常访问。', 'success');
-                } else {
-                    showMessage('⚠️ 连接测试失败: ' + result.error, 'error');
-                }
-            } catch (error) {
-                console.error('连接测试错误:', error);
-                showMessage('❌ 连接测试失败: ' + error.message, 'error');
-            } finally {
-                if (testConnectionBtn) {
-                    testConnectionBtn.disabled = false;
-                    testConnectionBtn.textContent = '测试连接';
-                }
-            }
+            const testData = {
+                test: true,
+                timestamp: new Date().toISOString(),
+                action: 'test_connection'
+            };
+            
+            sendToN8n(testData)
+                .then(function(result) {
+                    if (result.success) {
+                        showMessage('✅ 连接测试成功！n8n Webhook 可正常访问。', 'success');
+                    } else {
+                        showMessage('⚠️ 连接测试失败: ' + result.error, 'error');
+                    }
+                })
+                .catch(function(error) {
+                    console.error('连接测试错误:', error);
+                    showMessage('❌ 连接测试失败: ' + error.message, 'error');
+                })
+                .finally(function() {
+                    if (testConnectionBtn) {
+                        testConnectionBtn.disabled = false;
+                        testConnectionBtn.textContent = '测试连接';
+                    }
+                });
         }
 
         // 发送到 n8n 的函数 - 使用 GET 方法
-        async function sendToN8n(data) {
-            try {
-                console.log('正在发送数据到 n8n (GET):', N8N_WEBHOOK_URL);
-                console.log('发送的数据:', data);
-                
-                // 将数据转换为查询参数
-                const queryParams = new URLSearchParams(data).toString();
-                const urlWithParams = `${N8N_WEBHOOK_URL}?${queryParams}`;
-                
-                console.log('完整URL:', urlWithParams);
-                
-                // 使用 GET 请求
-                const response = await fetch(urlWithParams, {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json',
-                    }
-                });
-
-                console.log('n8n 响应状态:', response.status);
-                
-                if (response.ok) {
-                    let responseData;
-                    try {
-                        responseData = await response.json();
-                    } catch (e) {
-                        // 如果响应不是JSON，使用文本
-                        responseData = await response.text();
-                    }
-                    console.log('n8n 完整响应:', responseData);
-                    return { 
-                        success: true, 
-                        message: '数据成功发送到 n8n',
-                        data: responseData
-                    };
-                } else {
-                    const errorText = await response.text();
-                    console.error('n8n 返回错误:', response.status, errorText);
-                    return { 
-                        success: false, 
-                        error: `HTTP ${response.status}: ${errorText}` 
-                    };
+        function sendToN8n(data) {
+            return new Promise(function(resolve, reject) {
+                try {
+                    console.log('正在发送数据到 n8n (GET):', N8N_WEBHOOK_URL);
+                    console.log('发送的数据:', data);
+                    
+                    // 将数据转换为查询参数
+                    const queryParams = new URLSearchParams(data).toString();
+                    const urlWithParams = N8N_WEBHOOK_URL + '?' + queryParams;
+                    
+                    console.log('完整URL:', urlWithParams);
+                    
+                    // 使用 GET 请求
+                    fetch(urlWithParams, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(function(response) {
+                        console.log('n8n 响应状态:', response.status);
+                        
+                        if (response.ok) {
+                            return response.json().then(function(responseData) {
+                                console.log('n8n 完整响应:', responseData);
+                                resolve({ 
+                                    success: true, 
+                                    message: '数据成功发送到 n8n',
+                                    data: responseData
+                                });
+                            }).catch(function() {
+                                // 如果响应不是JSON，使用文本
+                                return response.text().then(function(text) {
+                                    resolve({ 
+                                        success: true, 
+                                        message: '数据成功发送到 n8n',
+                                        data: text
+                                    });
+                                });
+                            });
+                        } else {
+                            return response.text().then(function(errorText) {
+                                console.error('n8n 返回错误:', response.status, errorText);
+                                resolve({ 
+                                    success: false, 
+                                    error: 'HTTP ' + response.status + ': ' + errorText
+                                });
+                            });
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('请求 n8n 失败:', error);
+                        resolve({ 
+                            success: false, 
+                            error: '网络请求失败: ' + error.message
+                        });
+                    });
+                } catch (error) {
+                    console.error('发送数据时出错:', error);
+                    reject(error);
                 }
-
-            } catch (error) {
-                console.error('请求 n8n 失败:', error);
-                return { 
-                    success: false, 
-                    error: '网络请求失败: ' + error.message 
-                };
-            }
+            });
         }
 
         // 表单验证函数
@@ -758,12 +747,12 @@
             const statusMessage = document.getElementById('statusMessage');
             if (statusMessage) {
                 statusMessage.textContent = message;
-                statusMessage.className = `status-message ${type === 'success' ? 'status-success' : 'status-error'}`;
+                statusMessage.className = 'status-message ' + (type === 'success' ? 'status-success' : 'status-error');
                 statusMessage.style.display = 'block';
                 
                 // 自动隐藏成功消息
                 if (type === 'success') {
-                    setTimeout(() => {
+                    setTimeout(function() {
                         statusMessage.style.display = 'none';
                     }, 5000);
                 }
