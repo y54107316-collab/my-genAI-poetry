@@ -398,6 +398,70 @@
     </div>
 
    <script>
+       很好！你需要在代码中修改 URL 的地方。我来指出具体位置并给你一个更清晰的版本。
+
+在代码中修改 URL 的位置
+
+1. 主要修改位置：sendToN8n 函数中的 URL
+
+找到这个函数，修改其中的 URL：
+
+```javascript
+// 发送到 n8n 的函数 - 修复版本
+async function sendToN8n(data) {
+    try {
+        console.log('正在发送数据到 n8n...');
+        
+        // ⭐⭐⭐ 在这里修改你的 URL ⭐⭐⭐
+        const YOUR_N8N_URL = 'http://localhost:5678/webhook/my%20webhook'; // ← 修改这一行
+        
+        const response = await fetch(YOUR_N8N_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+
+        console.log('HTTP 状态码:', response.status);
+        
+        // 获取响应文本
+        const responseText = await response.text();
+        console.log('n8n 响应:', responseText);
+
+        // 成功条件：状态码为 200 或者响应包含 "workflow"
+        if (response.status === 200 || responseText.includes('workflow')) {
+            return { 
+                success: true, 
+                message: 'n8n 工作流已启动',
+                response: responseText
+            };
+        } else {
+            return { 
+                success: false, 
+                error: `HTTP ${response.status}: ${responseText}` 
+            };
+        }
+
+    } catch (error) {
+        console.error('请求失败:', error);
+        return { 
+            success: false, 
+            error: '网络错误: ' + error.message 
+        };
+    }
+}
+```
+
+完整代码（包含清晰的 URL 配置）
+
+这是完整的 JavaScript 代码，我已经把 URL 放在最上面，方便你修改：
+
+```javascript
+<script>
+    //
+    const N8N_WEBHOOK_URL = 'http://localhost:5678/webhook/my webhook'; // 修改这一行
+    
     // 水墨背景图片数组
     const inkImages = [
         'https://images.unsplash.com/photo-1707343843437-caacff5cfa74?ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
@@ -405,6 +469,7 @@
         'https://images.unsplash.com/photo-1707343843598-3107774b6e4a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
         'https://images.unsplash.com/photo-1707343844158-97c8c16a4851?ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80'
     ];
+    // ==================== 配置区域结束 ====================
 
     document.addEventListener('DOMContentLoaded', function() {
         const randomIndex = Math.floor(Math.random() * inkImages.length);
@@ -474,6 +539,7 @@
             };
 
             console.log('准备发送数据:', requestData);
+            console.log('发送到 URL:', N8N_WEBHOOK_URL);
 
             // 尝试发送到 n8n
             const result = await sendToN8n(requestData);
@@ -498,12 +564,12 @@
         }
     }
 
-    // 发送到 n8n 的函数 - 修复版本
+    // 发送到 n8n 的函数
     async function sendToN8n(data) {
         try {
-            console.log('正在发送数据到 n8n...');
+            console.log('正在发送数据到:', N8N_WEBHOOK_URL);
             
-            const response = await fetch('http://localhost:5678/webhook/my%20webhook', {
+            const response = await fetch(N8N_WEBHOOK_URL, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
