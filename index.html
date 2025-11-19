@@ -477,242 +477,49 @@
         }
     }
 
-    // 生成诗歌函数
-    async function generatePoetry() {
-        console.log('开始生成诗歌...');
+// 发送到 n8n 的函数 - 确保真正发送数据
+async function sendToN8n(data) {
+    try {
+        console.log('正在发送数据到 n8n:', N8N_WEBHOOK_URL);
+        console.log('发送的数据:', data);
         
-        // 安全地获取表单值
-        const emotion = getSafeValue('emotion');
-        const imagery = getSafeValue('imagery');
-        const additional = getSafeValue('additional');
-        const theme = getSafeValue('theme');
-        const genre = getSafeValue('genre');
-        const calligraphy = getSafeValue('calligraphy');
+        // 真正发送 POST 请求到 n8n webhook
+        const response = await fetch(N8N_WEBHOOK_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
 
-        // 验证必填字段
-        if (!emotion || !imagery) {
-            showMessage('请至少填写诗歌感情和主要意象', 'error');
-            return;
-        }
-
-        // 显示加载状态
-        const generateBtn = document.getElementById('generateBtn');
-        if (generateBtn) {
-            generateBtn.disabled = true;
-            generateBtn.textContent = '生成中...';
-        }
-
-        try {
-            // 准备发送的数据
-            const requestData = {
-                emotion: emotion,
-                imagery: imagery,
-                additional: additional,
-                theme: theme,
-                genre: genre,
-                calligraphy: calligraphy,
-                timestamp: new Date().toISOString()
+        console.log('n8n 响应状态:', response.status);
+        
+        if (response.ok) {
+            const responseData = await response.json();
+            console.log('n8n 完整响应:', responseData);
+            return { 
+                success: true, 
+                message: '数据成功发送到 n8n',
+                data: responseData
             };
-
-            console.log('准备发送数据:', requestData);
-            console.log('发送到 URL:', N8N_WEBHOOK_URL);
-
-            // 尝试发送到 n8n
-            const result = await sendToN8n(requestData);
-            
-            if (result.success) {
-                showMessage('✅ 数据成功发送到 n8n！工作流已启动。', 'success');
-                showPoetryResult(emotion, imagery, theme, genre, calligraphy);
-            } else {
-                showMessage('⚠️ 发送失败: ' + result.error, 'error');
-                // 即使失败也显示模拟结果
-                showPoetryResult(emotion, imagery, theme, genre, calligraphy);
-            }
-
-        } catch (error) {
-            console.error('错误:', error);
-            showMessage('❌ 发生错误: ' + error.message, 'error');
-            // 即使出错也显示结果
-            showPoetryResult(emotion, imagery, theme, genre, calligraphy);
-        } finally {
-            if (generateBtn) {
-                generateBtn.disabled = false;
-                generateBtn.textContent = '生成诗歌图片';
-            }
-        }
-    }
-
-    // 安全获取元素值的辅助函数
-    function getSafeValue(elementId) {
-        const element = document.getElementById(elementId);
-        if (element) {
-            return element.value || '';
-        }
-        return '';
-    }
-
-    // 发送到 n8n 的函数 - 修复 CORS 问题
-    async function sendToN8n(data) {
-        try {
-            console.log('正在发送数据到:', N8N_WEBHOOK_URL);
-            
-            const response = await fetch(N8N_WEBHOOK_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                mode: 'cors', // 明确指定 CORS 模式
-                body: JSON.stringify(data)
-            });
-
-            console.log('HTTP 状态码:', response.status);
-            
-            // 获取响应文本
-            const responseText = await response.text();
-            console.log('n8n 响应:', responseText);
-
-            // 成功条件：状态码为 200 或者响应包含 "workflow"
-            if (response.status === 200 || responseText.includes('workflow')) {
-                return { 
-                    success: true, 
-                    message: 'n8n 工作流已启动',
-                    response: responseText
-                };
-            } else {
-                return { 
-                    success: false, 
-                    error: `HTTP ${response.status}: ${responseText}` 
-                };
-            }
-
-        } catch (error) {
-            console.error('请求失败:', error);
+        } else {
+            const errorText = await response.text();
+            console.error('n8n 返回错误:', response.status, errorText);
             return { 
                 success: false, 
-                error: '网络错误: ' + error.message 
+                error: `HTTP ${response.status}: ${errorText}` 
             };
         }
-    }
 
-    function showMessage(message, type) {
-        // 移除旧消息
-        const oldMessages = document.querySelectorAll('.temp-message');
-        oldMessages.forEach(msg => {
-            if (msg.parentNode) {
-                msg.parentNode.removeChild(msg);
-            }
-        });
-        
-        const messageDiv = document.createElement('div');
-        messageDiv.className = 'temp-message';
-        messageDiv.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 20px;
-            background: ${type === 'success' ? '#d4edda' : '#f8d7da'};
-            color: ${type === 'success' ? '#155724' : '#721c24'};
-            border: 1px solid ${type === 'success' ? '#c3e6cb' : '#f5c6cb'};
-            border-radius: 5px;
-            z-index: 10000;
-            max-width: 400px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        `;
-        messageDiv.textContent = message;
-        
-        document.body.appendChild(messageDiv);
-        
-        setTimeout(() => {
-            if (messageDiv.parentNode) {
-                messageDiv.parentNode.removeChild(messageDiv);
-            }
-        }, 5000);
-    }
-
-    function showPoetryResult(emotion, imagery, theme, genre, calligraphy) {
-        console.log('显示诗歌结果...');
-        
-        const poetryContent = document.getElementById('poetryContent');
-        const poetryInfo = document.getElementById('poetryInfo');
-        const outputSection = document.getElementById('outputSection');
-        
-        // 安全检查所有元素是否存在
-        if (!poetryContent || !poetryInfo || !outputSection) {
-            console.error('找不到输出元素！');
-            showMessage('错误：找不到输出区域', 'error');
-            return;
-        }
-
-        // 安全地生成诗歌内容
-        const poetryText = generateMockPoetry(emotion, imagery, theme, genre);
-        
-        // 安全设置 innerHTML
-        try {
-            poetryContent.innerHTML = poetryText || '诗歌生成中...';
-        } catch (error) {
-            console.error('设置诗歌内容失败:', error);
-            poetryContent.textContent = '诗歌生成中...';
-        }
-        
-        // 安全设置诗歌信息
-        try {
-            const infoText = `题材：${theme || ''} | 体裁：${genre || ''} | 书法：${calligraphy || ''} | 感情：${emotion || ''}`;
-            poetryInfo.textContent = infoText;
-        } catch (error) {
-            console.error('设置诗歌信息失败:', error);
-            poetryInfo.textContent = '诗歌信息';
-        }
-        
-        // 显示输出区域
-        outputSection.style.display = 'block';
-        
-        // 安全滚动
-        try {
-            outputSection.scrollIntoView({ behavior: 'smooth' });
-        } catch (error) {
-            console.error('滚动失败:', error);
-        }
-        
-        console.log('诗歌结果显示完成');
-    }
-
-    function generateMockPoetry(emotion, imagery, theme, genre) {
-        console.log('生成模拟诗歌:', { emotion, imagery, theme, genre });
-        
-        const safeTheme = theme || '山水诗';
-        const safeGenre = genre || '七言绝句';
-        
-        const poems = {
-            '山水诗': {
-                '古体诗': "青山隐隐水迢迢，秋尽江南草未凋。<br>二十四桥明月夜，玉人何处教吹箫。",
-                '律诗': "空山新雨后，天气晚来秋。<br>明月松间照，清泉石上流。<br>竹喧归浣女，莲动下渔舟。<br>随意春芳歇，王孙自可留。",
-                '五言绝句': "千山鸟飞绝，万径人踪灭。<br>孤舟蓑笠翁，独钓寒江雪。",
-                '七言绝句': "日照香炉生紫烟，遥看瀑布挂前川。<br>飞流直下三千尺，疑是银河落九天。"
-            },
-            '咏物诗': {
-                '古体诗': "墙角数枝梅，凌寒独自开。<br>遥知不是雪，为有暗香来。",
-                '律诗': "不论平地与山尖，无限风光尽被占。<br>采得百花成蜜后，为谁辛苦为谁甜？",
-                '五言绝句': "解落三秋叶，能开二月花。<br>过江千尺浪，入竹万竿斜。",
-                '七言绝句': "千锤万凿出深山，烈火焚烧若等闲。<br>粉骨碎身浑不怕，要留清白在人间。"
-            },
-            '抒情诗': {
-                '古体诗': "床前明月光，疑是地上霜。<br>举头望明月，低头思故乡。",
-                '律诗': "相见时难别亦难，东风无力百花残。<br>春蚕到死丝方尽，蜡炬成灰泪始干。",
-                '五言绝句': "春眠不觉晓，处处闻啼鸟。<br>夜来风雨声，花落知多少。",
-                '七言绝句': "去年今日此门中，人面桃花相映红。<br>人面不知何处去，桃花依旧笑春风。"
-            }
+    } catch (error) {
+        console.error('请求 n8n 失败:', error);
+        return { 
+            success: false, 
+            error: '网络请求失败: ' + error.message 
         };
-
-        const themePoems = poems[safeTheme] || poems['山水诗'];
-        const poem = themePoems[safeGenre] || themePoems['七言绝句'] || "诗歌生成中...";
-        
-        console.log('选择的诗歌:', poem);
-        return poem;
     }
+}
 
-    function downloadPoetryImage() {
-        alert('下载功能将在 n8n 工作流完成后实现');
-    }
 </script>
 </script>
 </body>
