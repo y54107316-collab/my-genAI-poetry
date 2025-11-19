@@ -397,70 +397,9 @@
         </footer>
     </div>
 
-   <script>
-       很好！你需要在代码中修改 URL 的地方。我来指出具体位置并给你一个更清晰的版本。
 
-在代码中修改 URL 的位置
-
-1. 主要修改位置：sendToN8n 函数中的 URL
-
-找到这个函数，修改其中的 URL：
-
-```javascript
-// 发送到 n8n 的函数 - 修复版本
-async function sendToN8n(data) {
-    try {
-        console.log('正在发送数据到 n8n...');
-        
-        // ⭐⭐⭐ 在这里修改你的 URL ⭐⭐⭐
-        const YOUR_N8N_URL = 'http://localhost:5678/webhook/my%20webhook'; // ← 修改这一行
-        
-        const response = await fetch(YOUR_N8N_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
-        });
-
-        console.log('HTTP 状态码:', response.status);
-        
-        // 获取响应文本
-        const responseText = await response.text();
-        console.log('n8n 响应:', responseText);
-
-        // 成功条件：状态码为 200 或者响应包含 "workflow"
-        if (response.status === 200 || responseText.includes('workflow')) {
-            return { 
-                success: true, 
-                message: 'n8n 工作流已启动',
-                response: responseText
-            };
-        } else {
-            return { 
-                success: false, 
-                error: `HTTP ${response.status}: ${responseText}` 
-            };
-        }
-
-    } catch (error) {
-        console.error('请求失败:', error);
-        return { 
-            success: false, 
-            error: '网络错误: ' + error.message 
-        };
-    }
-}
-```
-
-完整代码（包含清晰的 URL 配置）
-
-这是完整的 JavaScript 代码，我已经把 URL 放在最上面，方便你修改：
-
-```javascript
 <script>
-    //
-    const N8N_WEBHOOK_URL = 'http://localhost:5678/webhook/my webhook'; // 修改这一行
+    const N8N_WEBHOOK_URL = 'http://localhost:5678/webhook/my webhook'; 
     
     // 水墨背景图片数组
     const inkImages = [
@@ -469,23 +408,41 @@ async function sendToN8n(data) {
         'https://images.unsplash.com/photo-1707343843598-3107774b6e4a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
         'https://images.unsplash.com/photo-1707343844158-97c8c16a4851?ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80'
     ];
-    // ==================== 配置区域结束 ====================
 
+    // 等待页面完全加载
     document.addEventListener('DOMContentLoaded', function() {
-        const randomIndex = Math.floor(Math.random() * inkImages.length);
-        document.getElementById('inkBackground').style.backgroundImage = `url('${inkImages[randomIndex]}')`;
+        console.log('页面加载完成，初始化组件...');
+        
+        // 安全地设置背景
+        const inkBackground = document.getElementById('inkBackground');
+        if (inkBackground) {
+            const randomIndex = Math.floor(Math.random() * inkImages.length);
+            inkBackground.style.backgroundImage = `url('${inkImages[randomIndex]}')`;
+        }
 
-        document.getElementById('generateBtn').addEventListener('click', function() {
-            generatePoetry();
-        });
+        // 安全地绑定事件
+        const generateBtn = document.getElementById('generateBtn');
+        if (generateBtn) {
+            generateBtn.addEventListener('click', function() {
+                generatePoetry();
+            });
+        }
 
-        document.getElementById('downloadBtn').addEventListener('click', function() {
-            downloadPoetryImage();
-        });
+        const downloadBtn = document.getElementById('downloadBtn');
+        if (downloadBtn) {
+            downloadBtn.addEventListener('click', function() {
+                downloadPoetryImage();
+            });
+        }
+        
+        console.log('初始化完成');
     });
 
     function triggerFileInput(boxNumber) {
-        document.getElementById(`fileInput${boxNumber}`).click();
+        const fileInput = document.getElementById(`fileInput${boxNumber}`);
+        if (fileInput) {
+            fileInput.click();
+        }
     }
 
     function previewImage(input, boxNumber) {
@@ -494,12 +451,18 @@ async function sendToN8n(data) {
             
             reader.onload = function(e) {
                 const preview = document.getElementById(`preview${boxNumber}`);
-                preview.src = e.target.result;
-                preview.style.display = 'block';
-                
                 const uploadBox = document.getElementById(`uploadBox${boxNumber}`);
-                uploadBox.querySelector('i').style.display = 'none';
-                uploadBox.querySelector('span').style.display = 'none';
+                
+                if (preview && uploadBox) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    
+                    const icon = uploadBox.querySelector('i');
+                    const text = uploadBox.querySelector('span');
+                    
+                    if (icon) icon.style.display = 'none';
+                    if (text) text.style.display = 'none';
+                }
             }
             
             reader.readAsDataURL(input.files[0]);
@@ -508,23 +471,28 @@ async function sendToN8n(data) {
 
     // 生成诗歌函数
     async function generatePoetry() {
-        const emotion = document.getElementById('emotion').value;
-        const imagery = document.getElementById('imagery').value;
-        const additional = document.getElementById('additional').value;
-        const theme = document.getElementById('theme').value;
-        const genre = document.getElementById('genre').value;
-        const calligraphy = document.getElementById('calligraphy').value;
+        console.log('开始生成诗歌...');
+        
+        // 安全地获取表单值
+        const emotion = getSafeValue('emotion');
+        const imagery = getSafeValue('imagery');
+        const additional = getSafeValue('additional');
+        const theme = getSafeValue('theme');
+        const genre = getSafeValue('genre');
+        const calligraphy = getSafeValue('calligraphy');
 
         // 验证必填字段
         if (!emotion || !imagery) {
-            alert('请至少填写诗歌感情和主要意象');
+            showMessage('请至少填写诗歌感情和主要意象', 'error');
             return;
         }
 
         // 显示加载状态
         const generateBtn = document.getElementById('generateBtn');
-        generateBtn.disabled = true;
-        generateBtn.textContent = '生成中...';
+        if (generateBtn) {
+            generateBtn.disabled = true;
+            generateBtn.textContent = '生成中...';
+        }
 
         try {
             // 准备发送的数据
@@ -559,9 +527,20 @@ async function sendToN8n(data) {
             // 即使出错也显示结果
             showPoetryResult(emotion, imagery, theme, genre, calligraphy);
         } finally {
-            generateBtn.disabled = false;
-            generateBtn.textContent = '生成诗歌图片';
+            if (generateBtn) {
+                generateBtn.disabled = false;
+                generateBtn.textContent = '生成诗歌图片';
+            }
         }
+    }
+
+    // 安全获取元素值的辅助函数
+    function getSafeValue(elementId) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            return element.value || '';
+        }
+        return '';
     }
 
     // 发送到 n8n 的函数
@@ -609,7 +588,11 @@ async function sendToN8n(data) {
     function showMessage(message, type) {
         // 移除旧消息
         const oldMessages = document.querySelectorAll('.temp-message');
-        oldMessages.forEach(msg => msg.remove());
+        oldMessages.forEach(msg => {
+            if (msg.parentNode) {
+                msg.parentNode.removeChild(msg);
+            }
+        });
         
         const messageDiv = document.createElement('div');
         messageDiv.className = 'temp-message';
@@ -638,17 +621,60 @@ async function sendToN8n(data) {
     }
 
     function showPoetryResult(emotion, imagery, theme, genre, calligraphy) {
+        console.log('显示诗歌结果...');
+        
+        const poetryContent = document.getElementById('poetryContent');
+        const poetryInfo = document.getElementById('poetryInfo');
+        const outputSection = document.getElementById('outputSection');
+        
+        // 安全检查所有元素是否存在
+        if (!poetryContent || !poetryInfo || !outputSection) {
+            console.error('找不到输出元素！');
+            showMessage('错误：找不到输出区域', 'error');
+            return;
+        }
+
+        // 安全地生成诗歌内容
         const poetryText = generateMockPoetry(emotion, imagery, theme, genre);
         
-        document.getElementById('poetryContent').innerHTML = poetryText;
-        document.getElementById('poetryInfo').innerHTML = 
-            `题材：${theme} | 体裁：${genre} | 书法：${calligraphy} | 感情：${emotion}`;
+        // 安全设置 innerHTML
+        try {
+            poetryContent.innerHTML = poetryText || '诗歌生成中...';
+        } catch (error) {
+            console.error('设置诗歌内容失败:', error);
+            poetryContent.textContent = '诗歌生成中...';
+        }
         
-        document.getElementById('outputSection').style.display = 'block';
-        document.getElementById('outputSection').scrollIntoView({ behavior: 'smooth' });
+        // 安全设置诗歌信息
+        try {
+            const infoText = `题材：${theme || ''} | 体裁：${genre || ''} | 书法：${calligraphy || ''} | 感情：${emotion || ''}`;
+            poetryInfo.textContent = infoText; // 使用 textContent 避免 HTML 问题
+        } catch (error) {
+            console.error('设置诗歌信息失败:', error);
+            poetryInfo.textContent = '诗歌信息';
+        }
+        
+        // 显示输出区域
+        outputSection.style.display = 'block';
+        
+        // 安全滚动
+        try {
+            outputSection.scrollIntoView({ behavior: 'smooth' });
+        } catch (error) {
+            console.error('滚动失败:', error);
+            // 忽略滚动错误，不影响主要功能
+        }
+        
+        console.log('诗歌结果显示完成');
     }
 
     function generateMockPoetry(emotion, imagery, theme, genre) {
+        console.log('生成模拟诗歌:', { emotion, imagery, theme, genre });
+        
+        // 确保所有参数都是字符串
+        const safeTheme = theme || '山水诗';
+        const safeGenre = genre || '七言绝句';
+        
         const poems = {
             '山水诗': {
                 '古体诗': "青山隐隐水迢迢，秋尽江南草未凋。<br>二十四桥明月夜，玉人何处教吹箫。",
@@ -670,9 +696,11 @@ async function sendToN8n(data) {
             }
         };
 
-        const themePoems = poems[theme] || poems['山水诗'];
-        const poem = themePoems[genre] || themePoems['七言绝句'];
+        // 安全获取诗歌内容
+        const themePoems = poems[safeTheme] || poems['山水诗'];
+        const poem = themePoems[safeGenre] || themePoems['七言绝句'] || "诗歌生成中...";
         
+        console.log('选择的诗歌:', poem);
         return poem;
     }
 
