@@ -436,10 +436,11 @@
             });
         }
 
-        const downloadBtn = document.getElementById('downloadBtn');
-        if (downloadBtn) {
-            downloadBtn.addEventListener('click', function() {
-                downloadPoetryImage();
+        // 添加测试连接按钮的事件监听
+        const testConnectionBtn = document.getElementById('testConnectionBtn');
+        if (testConnectionBtn) {
+            testConnectionBtn.addEventListener('click', function() {
+                testConnection();
             });
         }
         
@@ -477,49 +478,169 @@
         }
     }
 
-// 发送到 n8n 的函数 - 确保真正发送数据
-async function sendToN8n(data) {
-    try {
-        console.log('正在发送数据到 n8n:', N8N_WEBHOOK_URL);
-        console.log('发送的数据:', data);
+    // 新增的 generatePoetry 函数
+    function generatePoetry() {
+        console.log('开始生成诗歌...');
         
-        // 真正发送 GET 请求到 n8n webhook
-        const response = await fetch(N8N_WEBHOOK_URL, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
-        });
+        // 收集表单数据
+        const formData = {
+            emotion: document.getElementById('emotion').value,
+            imagery: document.getElementById('imagery').value,
+            additional: document.getElementById('additional').value,
+            theme: document.getElementById('theme').value,
+            genre: document.getElementById('genre').value,
+            calligraphy: document.getElementById('calligraphy').value
+        };
+        
+        // 收集图片数据
+        const imageFiles = [];
+        for (let i = 1; i <= 5; i++) {
+            const fileInput = document.getElementById(`fileInput${i}`);
+            if (fileInput.files.length > 0) {
+                imageFiles.push(fileInput.files[0]);
+            }
+        }
+        
+        console.log('表单数据:', formData);
+        console.log('图片文件数量:', imageFiles.length);
+        
+        // 显示加载动画
+        const loadingElement = document.getElementById('loading');
+        const statusMessage = document.getElementById('statusMessage');
+        const debugInfo = document.getElementById('debugInfo');
+        
+        if (loadingElement) loadingElement.style.display = 'block';
+        if (statusMessage) {
+            statusMessage.style.display = 'none';
+            statusMessage.className = 'status-message';
+        }
+        if (debugInfo) debugInfo.style.display = 'none';
+        
+        // 发送数据到 n8n
+        sendToN8n(formData, imageFiles)
+            .then(result => {
+                // 隐藏加载动画
+                if (loadingElement) loadingElement.style.display = 'none';
+                
+                // 显示结果
+                if (statusMessage) {
+                    statusMessage.textContent = result.success ? 
+                        '数据成功发送到 n8n！' : 
+                        `发送失败: ${result.error}`;
+                    statusMessage.className = `status-message ${result.success ? 'status-success' : 'status-error'}`;
+                    statusMessage.style.display = 'block';
+                }
+                
+                // 显示调试信息
+                if (debugInfo) {
+                    debugInfo.textContent = JSON.stringify(result, null, 2);
+                    debugInfo.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                // 隐藏加载动画
+                if (loadingElement) loadingElement.style.display = 'none';
+                
+                // 显示错误
+                if (statusMessage) {
+                    statusMessage.textContent = `发生错误: ${error.message}`;
+                    statusMessage.className = 'status-message status-error';
+                    statusMessage.style.display = 'block';
+                }
+                
+                console.error('生成诗歌时出错:', error);
+            });
+    }
 
-        console.log('n8n 响应状态:', response.status);
+    // 测试连接函数
+    function testConnection() {
+        console.log('测试连接...');
         
-        if (response.ok) {
-            const responseData = await response.json();
-            console.log('n8n 完整响应:', responseData);
-            return { 
-                success: true, 
-                message: '数据成功发送到 n8n',
-                data: responseData
-            };
-        } else {
-            const errorText = await response.text();
-            console.error('n8n 返回错误:', response.status, errorText);
+        const loadingElement = document.getElementById('loading');
+        const statusMessage = document.getElementById('statusMessage');
+        
+        if (loadingElement) loadingElement.style.display = 'block';
+        if (statusMessage) {
+            statusMessage.style.display = 'none';
+            statusMessage.className = 'status-message';
+        }
+        
+        // 发送测试数据
+        sendToN8n({ test: true, message: '测试连接' }, [])
+            .then(result => {
+                if (loadingElement) loadingElement.style.display = 'none';
+                
+                if (statusMessage) {
+                    statusMessage.textContent = result.success ? 
+                        '连接测试成功！' : 
+                        `连接测试失败: ${result.error}`;
+                    statusMessage.className = `status-message ${result.success ? 'status-success' : 'status-error'}`;
+                    statusMessage.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                if (loadingElement) loadingElement.style.display = 'none';
+                
+                if (statusMessage) {
+                    statusMessage.textContent = `连接测试失败: ${error.message}`;
+                    statusMessage.className = 'status-message status-error';
+                    statusMessage.style.display = 'block';
+                }
+            });
+    }
+
+    // 发送到 n8n 的函数 - 确保真正发送数据
+    async function sendToN8n(data, imageFiles) {
+        try {
+            console.log('正在发送数据到 n8n:', N8N_WEBHOOK_URL);
+            console.log('发送的数据:', data);
+            
+            // 创建 FormData 对象，用于发送表单数据和文件
+            const formData = new FormData();
+            
+            // 添加文本数据
+            for (const key in data) {
+                formData.append(key, data[key]);
+            }
+            
+            // 添加图片文件
+            imageFiles.forEach((file, index) => {
+                formData.append(`image${index + 1}`, file);
+            });
+            
+            // 真正发送 POST 请求到 n8n webhook
+            const response = await fetch(N8N_WEBHOOK_URL, {
+                method: 'POST',
+                body: formData
+            });
+
+            console.log('n8n 响应状态:', response.status);
+            
+            if (response.ok) {
+                const responseData = await response.json();
+                console.log('n8n 完整响应:', responseData);
+                return { 
+                    success: true, 
+                    message: '数据成功发送到 n8n',
+                    data: responseData
+                };
+            } else {
+                const errorText = await response.text();
+                console.error('n8n 返回错误:', response.status, errorText);
+                return { 
+                    success: false, 
+                    error: `HTTP ${response.status}: ${errorText}` 
+                };
+            }
+
+        } catch (error) {
+            console.error('请求 n8n 失败:', error);
             return { 
                 success: false, 
-                error: `HTTP ${response.status}: ${errorText}` 
+                error: '网络请求失败: ' + error.message 
             };
         }
-
-    } catch (error) {
-        console.error('请求 n8n 失败:', error);
-        return { 
-            success: false, 
-            error: '网络请求失败: ' + error.message 
-        };
     }
-}
-
-</script>
+    </script>
 </body>
 </html>
