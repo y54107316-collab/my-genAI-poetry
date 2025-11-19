@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>诗意丹青 - 诗歌创作平台</title>
     <style>
-        /* 保持原有的CSS样式不变 */
         * {
             margin: 0;
             padding: 0;
@@ -270,6 +269,21 @@
             color: #7a5c3e;
             font-size: 0.9rem;
         }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .clear-btn {
+            background-color: #6c757d;
+        }
+        
+        .clear-btn:hover {
+            background-color: #5a6268;
+        }
     </style>
 </head>
 <body>
@@ -289,31 +303,31 @@
                         <i>+</i>
                         <span>上传图片</span>
                         <img id="preview1" src="" alt="预览图片">
-                        <input type="file" class="file-input" id="fileInput1" accept="image/png" onchange="previewImage(this, 1)">
+                        <input type="file" class="file-input" id="fileInput1" accept="image/*" onchange="previewImage(this, 1)">
                     </div>
                     <div class="upload-box" id="uploadBox2" onclick="triggerFileInput(2)">
                         <i>+</i>
                         <span>上传图片</span>
                         <img id="preview2" src="" alt="预览图片">
-                        <input type="file" class="file-input" id="fileInput2" accept="image/png" onchange="previewImage(this, 2)">
+                        <input type="file" class="file-input" id="fileInput2" accept="image/*" onchange="previewImage(this, 2)">
                     </div>
                     <div class="upload-box" id="uploadBox3" onclick="triggerFileInput(3)">
                         <i>+</i>
                         <span>上传图片</span>
                         <img id="preview3" src="" alt="预览图片">
-                        <input type="file" class="file-input" id="fileInput3" accept="image/png" onchange="previewImage(this, 3)">
+                        <input type="file" class="file-input" id="fileInput3" accept="image/*" onchange="previewImage(this, 3)">
                     </div>
                     <div class="upload-box" id="uploadBox4" onclick="triggerFileInput(4)">
                         <i>+</i>
                         <span>上传图片</span>
                         <img id="preview4" src="" alt="预览图片">
-                        <input type="file" class="file-input" id="fileInput4" accept="image/png" onchange="previewImage(this, 4)">
+                        <input type="file" class="file-input" id="fileInput4" accept="image/*" onchange="previewImage(this, 4)">
                     </div>
                     <div class="upload-box" id="uploadBox5" onclick="triggerFileInput(5)">
                         <i>+</i>
                         <span>上传图片</span>
                         <img id="preview5" src="" alt="预览图片">
-                        <input type="file" class="file-input" id="fileInput5" accept="image/png" onchange="previewImage(this, 5)">
+                        <input type="file" class="file-input" id="fileInput5" accept="image/*" onchange="previewImage(this, 5)">
                     </div>
                 </div>
             </div>
@@ -386,10 +400,11 @@
             <!-- 调试信息 -->
             <div class="debug-info" id="debugInfo"></div>
 
-            <button class="submit-btn" id="generateBtn">提交到n8n</button>
-            
-            <!-- 测试连接按钮 -->
-            <button type="button" class="submit-btn" id="testConnectionBtn" style="background-color: #6c757d; margin-top: 10px;">测试连接</button>
+            <div class="btn-container">
+                <button class="submit-btn" id="generateBtn">提交到n8n</button>
+                <button type="button" class="submit-btn clear-btn" id="testConnectionBtn">测试连接</button>
+                <button type="button" class="submit-btn clear-btn" id="clearBtn">清空表单</button>
+            </div>
         </section>
 
         <footer class="footer">
@@ -397,289 +412,314 @@
         </footer>
     </div>
 
-
     <script>
-    // ==================== 配置区域 ====================
-    // 使用不需要授权的 CORS 代理
-    const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
-    // 或者使用这个：const CORS_PROXY = 'https://corsproxy.io/?';
-    // 或者使用这个：const CORS_PROXY = 'https://proxy.cors.sh/';
-    // 方案二：直接本地访问（用于本地测试）
-    // 
-        const N8N_WEBHOOK_URL = 'http://localhost:5678/webhook/my20%webhook';
-    
-    // 水墨背景图片数组
-    const inkImages = [
-        'https://images.unsplash.com/photo-1707343843437-caacff5cfa74?ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-        'https://images.unsplash.com/photo-1707343843984-0ce97bd5b6d8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-        'https://images.unsplash.com/photo-1707343843598-3107774b6e4a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-        'https://images.unsplash.com/photo-1707343844158-97c8c16a4851?ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80'
-    ];
-    // ==================== 配置区域结束 ====================
-
-    // 等待页面完全加载
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('页面加载完成，初始化组件...');
+        // ==================== 配置区域 ====================
+        // n8n webhook URL - 注意空格被编码为%20
+        const N8N_WEBHOOK_URL = 'http://localhost:5678/webhook/my%20webhook';
         
-        // 安全地设置背景
-        const inkBackground = document.getElementById('inkBackground');
-        if (inkBackground) {
-            const randomIndex = Math.floor(Math.random() * inkImages.length);
-            inkBackground.style.backgroundImage = `url('${inkImages[randomIndex]}')`;
-        }
+        // 水墨背景图片数组
+        const inkImages = [
+            'https://images.unsplash.com/photo-1579546929662-711aa81148cf?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80',
+            'https://images.unsplash.com/photo-1541701494587-cb58502866ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80',
+            'https://images.unsplash.com/photo-1550684376-efcbd6e3f031?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80'
+        ];
+        // ==================== 配置区域结束 ====================
 
-        // 安全地绑定事件
-        const generateBtn = document.getElementById('generateBtn');
-        if (generateBtn) {
-            generateBtn.addEventListener('click', function() {
-                generatePoetry();
-            });
-        }
-
-        // 添加测试连接按钮的事件监听
-        const testConnectionBtn = document.getElementById('testConnectionBtn');
-        if (testConnectionBtn) {
-            testConnectionBtn.addEventListener('click', function() {
-                testConnection();
-            });
-        }
-        
-        console.log('初始化完成');
-    });
-
-    function triggerFileInput(boxNumber) {
-        const fileInput = document.getElementById(`fileInput${boxNumber}`);
-        if (fileInput) {
-            fileInput.click();
-        }
-    }
-
-    function previewImage(input, boxNumber) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
+        // 等待页面完全加载
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('页面加载完成，初始化组件...');
             
-            reader.onload = function(e) {
-                const preview = document.getElementById(`preview${boxNumber}`);
-                const uploadBox = document.getElementById(`uploadBox${boxNumber}`);
+            // 安全地设置背景
+            const inkBackground = document.getElementById('inkBackground');
+            if (inkBackground) {
+                const randomIndex = Math.floor(Math.random() * inkImages.length);
+                inkBackground.style.backgroundImage = `url('${inkImages[randomIndex]}')`;
+            }
+
+            // 安全地绑定事件
+            const generateBtn = document.getElementById('generateBtn');
+            if (generateBtn) {
+                generateBtn.addEventListener('click', function() {
+                    generatePoetry();
+                });
+            }
+
+            // 添加测试连接按钮的事件监听
+            const testConnectionBtn = document.getElementById('testConnectionBtn');
+            if (testConnectionBtn) {
+                testConnectionBtn.addEventListener('click', function() {
+                    testConnection();
+                });
+            }
+            
+            // 添加清空表单按钮的事件监听
+            const clearBtn = document.getElementById('clearBtn');
+            if (clearBtn) {
+                clearBtn.addEventListener('click', function() {
+                    clearForm();
+                });
+            }
+            
+            console.log('初始化完成');
+        });
+
+        function triggerFileInput(boxNumber) {
+            const fileInput = document.getElementById(`fileInput${boxNumber}`);
+            if (fileInput) {
+                fileInput.click();
+            }
+        }
+
+        function previewImage(input, boxNumber) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
                 
-                if (preview && uploadBox) {
-                    preview.src = e.target.result;
-                    preview.style.display = 'block';
+                reader.onload = function(e) {
+                    const preview = document.getElementById(`preview${boxNumber}`);
+                    const uploadBox = document.getElementById(`uploadBox${boxNumber}`);
                     
+                    if (preview && uploadBox) {
+                        preview.src = e.target.result;
+                        preview.style.display = 'block';
+                        
+                        const icon = uploadBox.querySelector('i');
+                        const text = uploadBox.querySelector('span');
+                        
+                        if (icon) icon.style.display = 'none';
+                        if (text) text.style.display = 'none';
+                    }
+                }
+                
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // 生成诗歌函数
+        function generatePoetry() {
+            console.log('开始生成诗歌...');
+            
+            // 验证表单
+            const validationError = validateForm();
+            if (validationError) {
+                showMessage(validationError, 'error');
+                return;
+            }
+            
+            // 收集表单数据
+            const formData = {
+                emotion: document.getElementById('emotion').value,
+                imagery: document.getElementById('imagery').value,
+                additional: document.getElementById('additional').value,
+                theme: document.getElementById('theme').value,
+                genre: document.getElementById('genre').value,
+                calligraphy: document.getElementById('calligraphy').value,
+                timestamp: new Date().toISOString(),
+                action: 'generate_poetry'
+            };
+            
+            console.log('表单数据:', formData);
+            
+            // 显示加载动画
+            showLoading(true);
+            
+            // 发送数据到 n8n
+            sendToN8n(formData)
+                .then(result => {
+                    // 隐藏加载动画
+                    showLoading(false);
+                    
+                    if (result.success) {
+                        showMessage('数据成功发送到 n8n！', 'success');
+                        console.log('n8n 响应:', result.data);
+                    } else {
+                        showMessage(`发送失败: ${result.error}`, 'error');
+                    }
+                    
+                    // 显示调试信息
+                    const debugInfo = document.getElementById('debugInfo');
+                    if (debugInfo) {
+                        debugInfo.textContent = JSON.stringify(result, null, 2);
+                        debugInfo.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    // 隐藏加载动画
+                    showLoading(false);
+                    
+                    showMessage(`发生错误: ${error.message}`, 'error');
+                    console.error('生成诗歌时出错:', error);
+                });
+        }
+
+        // 测试连接函数
+        async function testConnection() {
+            console.log('测试连接...');
+            
+            const testConnectionBtn = document.getElementById('testConnectionBtn');
+            if (testConnectionBtn) {
+                testConnectionBtn.disabled = true;
+                testConnectionBtn.textContent = '测试中...';
+            }
+
+            try {
+                const testData = {
+                    test: true,
+                    timestamp: new Date().toISOString(),
+                    action: 'test_connection'
+                };
+                
+                const result = await sendToN8n(testData);
+                
+                if (result.success) {
+                    showMessage('✅ 连接测试成功！n8n Webhook 可正常访问。', 'success');
+                } else {
+                    showMessage('⚠️ 连接测试失败: ' + result.error, 'error');
+                }
+            } catch (error) {
+                console.error('连接测试错误:', error);
+                showMessage('❌ 连接测试失败: ' + error.message, 'error');
+            } finally {
+                if (testConnectionBtn) {
+                    testConnectionBtn.disabled = false;
+                    testConnectionBtn.textContent = '测试连接';
+                }
+            }
+        }
+
+        // 发送到 n8n 的函数 - 使用 GET 方法
+        async function sendToN8n(data) {
+            try {
+                console.log('正在发送数据到 n8n (GET):', N8N_WEBHOOK_URL);
+                console.log('发送的数据:', data);
+                
+                // 将数据转换为查询参数
+                const queryParams = new URLSearchParams(data).toString();
+                const urlWithParams = `${N8N_WEBHOOK_URL}?${queryParams}`;
+                
+                console.log('完整URL:', urlWithParams);
+                
+                // 使用 GET 请求
+                const response = await fetch(urlWithParams, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                    }
+                });
+
+                console.log('n8n 响应状态:', response.status);
+                
+                if (response.ok) {
+                    const responseData = await response.json();
+                    console.log('n8n 完整响应:', responseData);
+                    return { 
+                        success: true, 
+                        message: '数据成功发送到 n8n',
+                        data: responseData
+                    };
+                } else {
+                    const errorText = await response.text();
+                    console.error('n8n 返回错误:', response.status, errorText);
+                    return { 
+                        success: false, 
+                        error: `HTTP ${response.status}: ${errorText}` 
+                    };
+                }
+
+            } catch (error) {
+                console.error('请求 n8n 失败:', error);
+                return { 
+                    success: false, 
+                    error: '网络请求失败: ' + error.message 
+                };
+            }
+        }
+
+        // 表单验证函数
+        function validateForm() {
+            const emotion = document.getElementById('emotion').value.trim();
+            const imagery = document.getElementById('imagery').value.trim();
+            
+            if (!emotion) {
+                return '请填写诗歌感情';
+            }
+            
+            if (!imagery) {
+                return '请填写诗歌意象';
+            }
+            
+            return null;
+        }
+
+        // 显示/隐藏加载动画
+        function showLoading(show) {
+            const loadingElement = document.getElementById('loading');
+            if (loadingElement) {
+                loadingElement.style.display = show ? 'block' : 'none';
+            }
+        }
+
+        // 显示消息
+        function showMessage(message, type = 'error') {
+            const statusMessage = document.getElementById('statusMessage');
+            if (statusMessage) {
+                statusMessage.textContent = message;
+                statusMessage.className = `status-message ${type === 'success' ? 'status-success' : 'status-error'}`;
+                statusMessage.style.display = 'block';
+                
+                // 自动隐藏成功消息
+                if (type === 'success') {
+                    setTimeout(() => {
+                        statusMessage.style.display = 'none';
+                    }, 5000);
+                }
+            }
+        }
+
+        // 清空表单
+        function clearForm() {
+            // 清空文本区域
+            document.getElementById('emotion').value = '';
+            document.getElementById('imagery').value = '';
+            document.getElementById('additional').value = '';
+            
+            // 重置选择框
+            document.getElementById('theme').selectedIndex = 0;
+            document.getElementById('genre').selectedIndex = 0;
+            document.getElementById('calligraphy').selectedIndex = 0;
+            
+            // 清空图片预览
+            for (let i = 1; i <= 5; i++) {
+                const preview = document.getElementById(`preview${i}`);
+                const uploadBox = document.getElementById(`uploadBox${i}`);
+                const fileInput = document.getElementById(`fileInput${i}`);
+                
+                if (preview) {
+                    preview.src = '';
+                    preview.style.display = 'none';
+                }
+                
+                if (uploadBox) {
                     const icon = uploadBox.querySelector('i');
                     const text = uploadBox.querySelector('span');
                     
-                    if (icon) icon.style.display = 'none';
-                    if (text) text.style.display = 'none';
+                    if (icon) icon.style.display = 'block';
+                    if (text) text.style.display = 'block';
+                }
+                
+                if (fileInput) {
+                    fileInput.value = '';
                 }
             }
             
-            reader.readAsDataURL(input.files[0]);
+            // 隐藏状态消息和调试信息
+            const statusMessage = document.getElementById('statusMessage');
+            const debugInfo = document.getElementById('debugInfo');
+            
+            if (statusMessage) statusMessage.style.display = 'none';
+            if (debugInfo) debugInfo.style.display = 'none';
+            
+            showMessage('表单已清空', 'success');
         }
-    }
-
-    // 新增的 generatePoetry 函数
-    function generatePoetry() {
-        console.log('开始生成诗歌...');
-        
-        // 收集表单数据
-        const formData = {
-            emotion: document.getElementById('emotion').value,
-            imagery: document.getElementById('imagery').value,
-            additional: document.getElementById('additional').value,
-            theme: document.getElementById('theme').value,
-            genre: document.getElementById('genre').value,
-            calligraphy: document.getElementById('calligraphy').value
-        };
-        
-        // 收集图片数据
-        const imageFiles = [];
-        for (let i = 1; i <= 5; i++) {
-            const fileInput = document.getElementById(`fileInput${i}`);
-            if (fileInput.files.length > 0) {
-                imageFiles.push(fileInput.files[0]);
-            }
-        }
-        
-        console.log('表单数据:', formData);
-        console.log('图片文件数量:', imageFiles.length);
-        
-        // 显示加载动画
-        const loadingElement = document.getElementById('loading');
-        const statusMessage = document.getElementById('statusMessage');
-        const debugInfo = document.getElementById('debugInfo');
-        
-        if (loadingElement) loadingElement.style.display = 'block';
-        if (statusMessage) {
-            statusMessage.style.display = 'none';
-            statusMessage.className = 'status-message';
-        }
-        if (debugInfo) debugInfo.style.display = 'none';
-        
-        // 发送数据到 n8n
-        sendToN8n(formData, imageFiles)
-            .then(result => {
-                // 隐藏加载动画
-                if (loadingElement) loadingElement.style.display = 'none';
-                
-                // 显示结果
-                if (statusMessage) {
-                    statusMessage.textContent = result.success ? 
-                        '数据成功发送到 n8n！' : 
-                        `发送失败: ${result.error}`;
-                    statusMessage.className = `status-message ${result.success ? 'status-success' : 'status-error'}`;
-                    statusMessage.style.display = 'block';
-                }
-                
-                // 显示调试信息
-                if (debugInfo) {
-                    debugInfo.textContent = JSON.stringify(result, null, 2);
-                    debugInfo.style.display = 'block';
-                }
-            })
-            .catch(error => {
-                // 隐藏加载动画
-                if (loadingElement) loadingElement.style.display = 'none';
-                
-                // 显示错误
-                if (statusMessage) {
-                    statusMessage.textContent = `发生错误: ${error.message}`;
-                    statusMessage.className = 'status-message status-error';
-                    statusMessage.style.display = 'block';
-                }
-                
-                console.error('生成诗歌时出错:', error);
-            });
-    }
-
-    // 测试连接函数
-    function testConnection() {
-        console.log('测试连接...');
-        
-        const loadingElement = document.getElementById('loading');
-        const statusMessage = document.getElementById('statusMessage');
-        
-        if (loadingElement) loadingElement.style.display = 'block';
-        if (statusMessage) {
-            statusMessage.style.display = 'none';
-            statusMessage.className = 'status-message';
-        }
-        
-        // 发送测试数据
-        sendToN8n({ test: true, message: '测试连接' }, [])
-            .then(result => {
-                if (loadingElement) loadingElement.style.display = 'none';
-                
-                if (statusMessage) {
-                    statusMessage.textContent = result.success ? 
-                        '连接测试成功！' : 
-                        `连接测试失败: ${result.error}`;
-                    statusMessage.className = `status-message ${result.success ? 'status-success' : 'status-error'}`;
-                    statusMessage.style.display = 'block';
-                }
-            })
-            .catch(error => {
-                if (loadingElement) loadingElement.style.display = 'none';
-                
-                if (statusMessage) {
-                    statusMessage.textContent = `连接测试失败: ${error.message}`;
-                    statusMessage.className = 'status-message status-error';
-                    statusMessage.style.display = 'block';
-                }
-            });
-    }
-
-    // 发送到 n8n 的函数 - 使用 GET 方法
-async function sendToN8n(data) {
-    try {
-        console.log('正在发送数据到 n8n (GET):', N8N_WEBHOOK_URL);
-        console.log('发送的数据:', data);
-        
-        // 将数据转换为查询参数
-        const queryParams = new URLSearchParams(data).toString();
-        const urlWithParams = `${N8N_WEBHOOK_URL}?${queryParams}`;
-        
-        console.log('完整URL:', urlWithParams);
-        
-        // 使用 GET 请求
-        const response = await fetch(urlWithParams, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-            }
-        });
-
-        console.log('n8n 响应状态:', response.status);
-        
-        if (response.ok) {
-            const responseData = await response.json();
-            console.log('n8n 完整响应:', responseData);
-            return { 
-                success: true, 
-                message: '数据成功发送到 n8n',
-                data: responseData
-            };
-        } else {
-            const errorText = await response.text();
-            console.error('n8n 返回错误:', response.status, errorText);
-            return { 
-                success: false, 
-                error: `HTTP ${response.status}: ${errorText}` 
-            };
-        }
-
-    } catch (error) {
-        console.error('请求 n8n 失败:', error);
-        return { 
-            success: false, 
-            error: '网络请求失败: ' + error.message 
-        };
-    }
-    // 测试连接函数 - 也使用 GET
-async function testConnection() {
-    console.log('测试连接...');
-    
-    const testConnectionBtn = document.getElementById('testConnectionBtn');
-    if (testConnectionBtn) {
-        testConnectionBtn.disabled = true;
-        testConnectionBtn.textContent = '测试中...';
-    }
-
-    try {
-        const testData = {
-            test: true,
-            timestamp: new Date().toISOString(),
-            action: 'test_connection'
-        };
-        
-        const queryParams = new URLSearchParams(testData).toString();
-        const testUrl = `${N8N_WEBHOOK_URL}?${queryParams}`;
-        
-        console.log('测试URL:', testUrl);
-        
-        const response = await fetch(testUrl, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-            }
-        });
-
-        if (response.ok) {
-            showMessage('✅ 连接测试成功！n8n Webhook 可正常访问。', 'success');
-        } else {
-            showMessage('⚠️ 连接测试失败: HTTP ' + response.status, 'error');
-        }
-    } catch (error) {
-        console.error('连接测试错误:', error);
-        showMessage('❌ 连接测试失败: ' + error.message, 'error');
-    } finally {
-        if (testConnectionBtn) {
-            testConnectionBtn.disabled = false;
-            testConnectionBtn.textContent = '测试连接';
-        }
-    }
-}
-
-</script>
+    </script>
 </body>
 </html>
