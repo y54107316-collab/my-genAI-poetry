@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>诗意丹青 - 诗歌创作平台</title>
     <style>
+        /* 保持原有CSS样式不变 */
         * {
             margin: 0;
             padding: 0;
@@ -434,7 +435,7 @@
     </div>
 
     <script>
-        // 配置区域
+        // 配置区域 - 保持不变
         const N8N_WEBHOOK_URL = 'http://localhost:5678/webhook/my%20webhook';
         const inkImages = [
             'https://images.unsplash.com/photo-1579546929662-711aa81148cf?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80',
@@ -464,7 +465,7 @@
             console.log('初始化完成');
         });
 
-        // 初始化图片上传功能
+        // 初始化图片上传功能 - 保持不变
         function initImageUpload() {
             for (let i = 1; i <= 5; i++) {
                 const uploadBox = document.getElementById(`uploadBox${i}`);
@@ -496,7 +497,7 @@
             }
         }
 
-        // 预览图片
+        // 预览图片 - 保持不变
         function previewImage(input, boxNumber) {
             if (input.files && input.files[0]) {
                 const file = input.files[0];
@@ -539,7 +540,7 @@
             }
         }
 
-        // 清除图片
+        // 清除图片 - 保持不变
         function clearImage(boxNumber) {
             const preview = document.getElementById(`preview${boxNumber}`);
             const uploadBox = document.getElementById(`uploadBox${boxNumber}`);
@@ -560,7 +561,7 @@
             }
         }
 
-        // 生成诗歌函数
+        // 生成诗歌函数 - 保持不变
         function generatePoetry() {
             console.log('开始生成诗歌...');
             
@@ -617,7 +618,7 @@
                 });
         }
 
-        // 测试连接函数
+        // 测试连接函数 - 保持不变
         function testConnection() {
             console.log('测试连接...');
             
@@ -653,7 +654,7 @@
                 });
         }
 
-        // 发送到 n8n 的函数 - 使用 POST 方法
+        // 发送到 n8n 的函数 - 修改为 POST 方法
         function sendToN8n(data) {
             return new Promise(function(resolve, reject) {
                 try {
@@ -714,73 +715,10 @@
             });
         }
 
-        // 表单验证函数
+        // 表单验证函数 - 保持不变
         function validateForm() {
             const emotion = document.getElementById('emotion').value.trim();
             const imagery = document.getElementById('imagery').value.trim();
             
             if (!emotion) {
-                return '请填写诗歌感情';
-            }
-            
-            if (!imagery) {
-                return '请填写诗歌意象';
-            }
-            
-            return null;
-        }
-
-        // 显示/隐藏加载动画
-        function showLoading(show) {
-            const loadingElement = document.getElementById('loading');
-            if (loadingElement) {
-                loadingElement.style.display = show ? 'block' : 'none';
-            }
-        }
-
-        // 显示消息
-        function showMessage(message, type) {
-            const statusMessage = document.getElementById('statusMessage');
-            if (statusMessage) {
-                statusMessage.textContent = message;
-                statusMessage.className = 'status-message ' + (type === 'success' ? 'status-success' : 'status-error');
-                statusMessage.style.display = 'block';
-                
-                // 自动隐藏成功消息
-                if (type === 'success') {
-                    setTimeout(function() {
-                        statusMessage.style.display = 'none';
-                    }, 5000);
-                }
-            }
-        }
-
-        // 清空表单
-        function clearForm() {
-            // 清空文本区域
-            document.getElementById('emotion').value = '';
-            document.getElementById('imagery').value = '';
-            document.getElementById('additional').value = '';
-            
-            // 重置选择框
-            document.getElementById('theme').selectedIndex = 0;
-            document.getElementById('genre').selectedIndex = 0;
-            document.getElementById('calligraphy').selectedIndex = 0;
-            
-            // 清空图片预览
-            for (let i = 1; i <= 5; i++) {
-                clearImage(i);
-            }
-            
-            // 隐藏状态消息和调试信息
-            const statusMessage = document.getElementById('statusMessage');
-            const debugInfo = document.getElementById('debugInfo');
-            
-            if (statusMessage) statusMessage.style.display = 'none';
-            if (debugInfo) debugInfo.style.display = 'none';
-            
-            showMessage('表单已清空', 'success');
-        }
-    </script>
-</body>
-</html>
+                return '请填写
