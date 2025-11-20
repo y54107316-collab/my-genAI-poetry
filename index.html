@@ -469,7 +469,6 @@
             for (let i = 1; i <= 5; i++) {
                 const uploadBox = document.getElementById(`uploadBox${i}`);
                 const fileInput = document.getElementById(`fileInput${i}`);
-                const preview = document.getElementById(`preview${i}`);
                 const deleteBtn = document.getElementById(`delete${i}`);
                 
                 if (uploadBox && fileInput) {
@@ -526,13 +525,12 @@
                         preview.src = e.target.result;
                         preview.style.display = 'block';
                         
-                        // 隐藏上传图标和文字
                         const icon = uploadBox.querySelector('i');
                         const text = uploadBox.querySelector('span');
+                        
                         if (icon) icon.style.display = 'none';
                         if (text) text.style.display = 'none';
                         
-                        // 显示删除按钮
                         deleteBtn.style.display = 'block';
                     }
                 };
@@ -549,15 +547,14 @@
             const deleteBtn = document.getElementById(`delete${boxNumber}`);
             
             if (preview && uploadBox && fileInput && deleteBtn) {
-                // 重置预览
                 preview.src = '';
                 preview.style.display = 'none';
                 fileInput.value = '';
                 deleteBtn.style.display = 'none';
                 
-                // 显示上传图标和文字
                 const icon = uploadBox.querySelector('i');
                 const text = uploadBox.querySelector('span');
+                
                 if (icon) icon.style.display = 'block';
                 if (text) text.style.display = 'block';
             }
@@ -574,25 +571,11 @@
                 return;
             }
             
-            // 收集表单数据
-            const formData = {
-                emotion: document.getElementById('emotion').value,
-                imagery: document.getElementById('imagery').value,
-                additional: document.getElementById('additional').value,
-                theme: document.getElementById('theme').value,
-                genre: document.getElementById('genre').value,
-                calligraphy: document.getElementById('calligraphy').value,
-                timestamp: new Date().toISOString(),
-                action: 'generate_poetry'
-            };
-            
-            console.log('表单数据:', formData);
-            
             // 显示加载动画
             showLoading(true);
             
-            // 发送数据到 n8n
-            sendToN8n(formData)
+            // 收集表单数据并发送到n8n
+            sendToN8n()
                 .then(function(result) {
                     // 隐藏加载动画
                     showLoading(false);
@@ -657,20 +640,54 @@
         }
 
         // 发送到 n8n 的函数 - 使用 POST 方法
-        function sendToN8n(data) {
+        function sendToN8n(testData = null) {
             return new Promise(function(resolve, reject) {
                 try {
                     console.log('正在发送数据到 n8n (POST):', N8N_WEBHOOK_URL);
-                    console.log('发送的数据:', data);
                     
-                    // 使用 POST 请求
+                    // 创建 FormData 对象
+                    const formData = new FormData();
+                    
+                    if (testData) {
+                        // 测试连接时只发送测试数据
+                        formData.append('test', testData.test);
+                        formData.append('timestamp', testData.timestamp);
+                        formData.append('action', testData.action);
+                        console.log('发送测试数据:', testData);
+                    } else {
+                        // 正常提交时收集所有表单数据
+                        const formDataObj = {
+                            emotion: document.getElementById('emotion').value,
+                            imagery: document.getElementById('imagery').value,
+                            additional: document.getElementById('additional').value,
+                            theme: document.getElementById('theme').value,
+                            genre: document.getElementById('genre').value,
+                            calligraphy: document.getElementById('calligraphy').value,
+                            timestamp: new Date().toISOString(),
+                            action: 'generate_poetry'
+                        };
+                        
+                        console.log('表单数据:', formDataObj);
+                        
+                        // 添加文本数据到 FormData
+                        Object.keys(formDataObj).forEach(key => {
+                            formData.append(key, formDataObj[key]);
+                        });
+                        
+                        // 添加图片文件到 FormData
+                        for (let i = 1; i <= 5; i++) {
+                            const fileInput = document.getElementById(`fileInput${i}`);
+                            if (fileInput && fileInput.files.length > 0) {
+                                formData.append(`image${i}`, fileInput.files[0]);
+                            }
+                        }
+                    }
+                    
+                    // 使用 POST 请求发送 FormData
                     fetch(N8N_WEBHOOK_URL, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify(data)
+                        body: formData,
+                        // 注意：不要设置 Content-Type，让浏览器自动设置 multipart/form-data 和 boundary
                     })
                     .then(function(response) {
                         console.log('n8n 响应状态:', response.status);
