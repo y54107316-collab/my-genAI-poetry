@@ -653,25 +653,21 @@
                 });
         }
 
-        // 发送到 n8n 的函数 - 使用 GET 方法
+        // 发送到 n8n 的函数 - 使用 POST 方法
         function sendToN8n(data) {
             return new Promise(function(resolve, reject) {
                 try {
-                    console.log('正在发送数据到 n8n (GET):', N8N_WEBHOOK_URL);
+                    console.log('正在发送数据到 n8n (POST):', N8N_WEBHOOK_URL);
                     console.log('发送的数据:', data);
                     
-                    // 将数据转换为查询参数
-                    const queryParams = new URLSearchParams(data).toString();
-                    const urlWithParams = N8N_WEBHOOK_URL + '?' + queryParams;
-                    
-                    console.log('完整URL:', urlWithParams);
-                    
-                    // 使用 GET 请求
-                    fetch(urlWithParams, {
-                        method: 'GET',
+                    // 使用 POST 请求
+                    fetch(N8N_WEBHOOK_URL, {
+                        method: 'POST',
                         headers: {
+                            'Content-Type': 'application/json',
                             'Accept': 'application/json'
-                        }
+                        },
+                        body: JSON.stringify(data)
                     })
                     .then(function(response) {
                         console.log('n8n 响应状态:', response.status);
